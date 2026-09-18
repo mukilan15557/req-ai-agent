@@ -18,6 +18,14 @@ st.set_page_config(
 
 
 # =========================================================
+# SESSION STATE
+# =========================================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+
+# =========================================================
 # GLASS UI CSS
 # =========================================================
 
@@ -39,9 +47,6 @@ st.markdown("""
     padding-bottom: 3rem;
 }
 
-
-/* Glass containers */
-
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: rgba(255, 255, 255, 0.055);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -53,9 +58,6 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
     padding: 8px;
 }
-
-
-/* Headings */
 
 h1 {
     font-size: 3.2rem !important;
@@ -71,15 +73,9 @@ h3 {
     font-weight: 700 !important;
 }
 
-
-/* Normal text */
-
 p {
     color: rgba(240, 243, 255, 0.78);
 }
-
-
-/* Buttons */
 
 .stButton > button {
     border-radius: 14px;
@@ -97,9 +93,6 @@ p {
     transform: translateY(-1px);
 }
 
-
-/* Primary button */
-
 .stButton > button[kind="primary"] {
     background: linear-gradient(
         135deg,
@@ -109,9 +102,6 @@ p {
     border: 1px solid rgba(255,255,255,0.18);
 }
 
-
-/* Text area */
-
 textarea {
     background: rgba(255,255,255,0.055) !important;
     border: 1px solid rgba(255,255,255,0.12) !important;
@@ -119,17 +109,11 @@ textarea {
     color: white !important;
 }
 
-
-/* Select boxes */
-
 div[data-baseweb="select"] > div {
     background: rgba(255,255,255,0.06);
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.12);
 }
-
-
-/* Metrics */
 
 div[data-testid="stMetric"] {
     background: rgba(255,255,255,0.045);
@@ -137,9 +121,6 @@ div[data-testid="stMetric"] {
     padding: 14px;
     border-radius: 16px;
 }
-
-
-/* Tabs */
 
 button[data-baseweb="tab"] {
     color: rgba(255,255,255,0.7);
@@ -149,23 +130,14 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: white;
 }
 
-
-/* Sidebar */
-
 section[data-testid="stSidebar"] {
     background: rgba(7, 9, 18, 0.82);
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
-
-/* Divider */
-
 hr {
     border-color: rgba(255,255,255,0.08);
 }
-
-
-/* Code blocks */
 
 code {
     border-radius: 8px;
@@ -176,24 +148,114 @@ code {
 
 
 # =========================================================
+# REQPILOT LOGIN
+# =========================================================
+
+if not st.session_state.logged_in:
+
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+
+    with col2:
+
+        with st.container(border=True):
+
+            st.markdown(
+                "<h1 style='text-align:center;'>🚀 ReqPilot</h1>",
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                "<p style='text-align:center;'>"
+                "AI Requirements Engineering Agent"
+                "</p>",
+                unsafe_allow_html=True
+            )
+
+            st.divider()
+
+            username = st.text_input(
+                "👤 Username",
+                placeholder="Enter username"
+            )
+
+            password = st.text_input(
+                "🔒 Password",
+                type="password",
+                placeholder="Enter password"
+            )
+
+            st.write("")
+
+            if st.button(
+                "🚀 Login",
+                type="primary",
+                use_container_width=True
+            ):
+
+                if (
+                    username == "reqpilot"
+                    and password == "reqpilot123"
+                ):
+
+                    st.session_state.logged_in = True
+
+                    st.success(
+                        "Login successful! 🎉"
+                    )
+
+                    time.sleep(0.5)
+
+                    st.rerun()
+
+                else:
+
+                    st.error(
+                        "❌ Invalid username or password."
+                    )
+
+            st.write("")
+
+            st.caption(
+                "Demo Login: reqpilot / reqpilot123"
+            )
+
+    st.stop()
+
+
+# =========================================================
 # SIDEBAR
 # =========================================================
 
 with st.sidebar:
 
     st.title("🚀 ReqPilot")
-    st.caption("AI Requirements Engineering Agent")
+
+    st.caption(
+        "AI Requirements Engineering Agent"
+    )
 
     st.divider()
+
+    # -----------------------------------------------------
+    # AI CONNECTION
+    # -----------------------------------------------------
 
     st.subheader("🔑 AI Connection")
 
     api_key = None
 
     try:
+
         api_key = st.secrets["GEMINI_API_KEY"]
-        st.success("API Key Loaded from Secrets")
+
+        st.success(
+            "API Key Loaded from Secrets"
+        )
+
     except Exception:
+
         api_key = st.text_input(
             "Gemini API Key",
             type="password",
@@ -201,6 +263,10 @@ with st.sidebar:
         )
 
     st.divider()
+
+    # -----------------------------------------------------
+    # DEMO PRESET
+    # -----------------------------------------------------
 
     st.subheader("🎬 Demo Preset")
 
@@ -217,6 +283,10 @@ with st.sidebar:
 
     st.divider()
 
+    # -----------------------------------------------------
+    # PIPELINE
+    # -----------------------------------------------------
+
     st.subheader("⚙️ Pipeline")
 
     st.write("💡 Raw Idea")
@@ -228,7 +298,23 @@ with st.sidebar:
 
     st.divider()
 
-    st.caption("G14 • AI Requirements Engineering Agent")
+    st.caption(
+        "G14 • AI Requirements Engineering Agent"
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # LOGOUT
+    # -----------------------------------------------------
+
+    if st.button(
+        "🚪 Logout",
+        use_container_width=True
+    ):
+
+        st.session_state.logged_in = False
+        st.rerun()
 
 
 # =========================================================
@@ -274,17 +360,20 @@ personalized learning recommendations.
 
 with st.container(border=True):
 
-    st.caption("G14 • AI REQUIREMENTS ENGINEERING AGENT")
+    st.caption(
+        "G14 • AI REQUIREMENTS ENGINEERING AGENT"
+    )
 
     st.title("🚀 ReqPilot")
 
     st.write(
-        "Turn an informal product idea into structured, development-ready "
-        "software requirements using AI."
+        "Turn an informal product idea into structured, "
+        "development-ready software requirements using AI."
     )
 
     st.write(
-        "Requirements • User Stories • Priorities • Gaps • Test Cases • Dependencies"
+        "Requirements • User Stories • Priorities • "
+        "Gaps • Test Cases • Dependencies"
     )
 
 
@@ -312,8 +401,8 @@ with st.container(border=True):
         value=default_text,
         height=190,
         placeholder=(
-            "Example: We want to build an online grocery delivery "
-            "platform where users can..."
+            "Example: We want to build an online grocery "
+            "delivery platform where users can..."
         ),
         label_visibility="collapsed"
     )
@@ -323,21 +412,37 @@ with st.container(border=True):
 # METRICS
 # =========================================================
 
-word_count = len(idea.split()) if idea.strip() else 0
+word_count = (
+    len(idea.split())
+    if idea.strip()
+    else 0
+)
 
 m1, m2, m3, m4 = st.columns(4)
 
 with m1:
-    st.metric("Input Words", word_count)
+    st.metric(
+        "Input Words",
+        word_count
+    )
 
 with m2:
-    st.metric("AI Modules", "6")
+    st.metric(
+        "AI Modules",
+        "6"
+    )
 
 with m3:
-    st.metric("Artifacts", "6")
+    st.metric(
+        "Artifacts",
+        "6"
+    )
 
 with m4:
-    st.metric("AI Engine", "Gemini")
+    st.metric(
+        "AI Engine",
+        "Gemini"
+    )
 
 
 # =========================================================
@@ -345,20 +450,32 @@ with m4:
 # =========================================================
 
 st.write("")
-st.subheader("🔄 Requirement Intelligence Pipeline")
+
+st.subheader(
+    "🔄 Requirement Intelligence Pipeline"
+)
 
 pipeline = [
+
     ("💡", "Raw Idea", "User Input"),
+
     ("🧩", "Extract", "Requirements"),
+
     ("🏷️", "Classify", "FR / NFR"),
+
     ("⚡", "Prioritize", "MoSCoW"),
+
     ("🔎", "Detect Gaps", "Ambiguities"),
+
     ("🧪", "Test Cases", "Validation")
 ]
 
 cols = st.columns(6)
 
-for col, item in zip(cols, pipeline):
+for col, item in zip(
+    cols,
+    pipeline
+):
 
     icon, title, subtitle = item
 
@@ -366,11 +483,17 @@ for col, item in zip(cols, pipeline):
 
         with st.container(border=True):
 
-            st.markdown(f"### {icon}")
+            st.markdown(
+                f"### {icon}"
+            )
 
-            st.write(f"**{title}**")
+            st.write(
+                f"**{title}**"
+            )
 
-            st.caption(subtitle)
+            st.caption(
+                subtitle
+            )
 
 
 # =========================================================
@@ -508,7 +631,8 @@ demo_data = {
 
         {
             "id": "TC-01",
-            "scenario": "User searches for an available grocery product.",
+            "scenario":
+                "User searches for an available grocery product.",
             "expected":
                 "Matching products should be displayed with product name, price, and availability."
         },
@@ -629,9 +753,13 @@ Rules:
 
 def analyze_with_gemini(idea, key):
 
-    client = genai.Client(api_key=key)
+    client = genai.Client(
+        api_key=key
+    )
 
-    prompt = create_prompt(idea)
+    prompt = create_prompt(
+        idea
+    )
 
     last_error = None
 
@@ -650,7 +778,9 @@ def analyze_with_gemini(idea, key):
                 )
             )
 
-            return json.loads(response.text)
+            return json.loads(
+                response.text
+            )
 
         except Exception as e:
 
@@ -658,15 +788,267 @@ def analyze_with_gemini(idea, key):
 
             error_text = str(e)
 
-            if "503" in error_text or "UNAVAILABLE" in error_text:
+            if (
+                "503" in error_text
+                or "UNAVAILABLE" in error_text
+            ):
 
                 if attempt < 2:
-                    time.sleep(2 ** attempt)
+
+                    time.sleep(
+                        2 ** attempt
+                    )
+
                     continue
 
             raise last_error
 
     raise last_error
+
+
+# =========================================================
+# SUMMARY DASHBOARD
+# =========================================================
+
+def display_summary(data):
+
+    functional = len(
+        data.get(
+            "functional_requirements",
+            []
+        )
+    )
+
+    non_functional = len(
+        data.get(
+            "non_functional_requirements",
+            []
+        )
+    )
+
+    user_stories = len(
+        data.get(
+            "user_stories",
+            []
+        )
+    )
+
+    priorities = len(
+        data.get(
+            "priorities",
+            []
+        )
+    )
+
+    ambiguities = len(
+        data.get(
+            "ambiguities",
+            []
+        )
+    )
+
+    test_cases = len(
+        data.get(
+            "test_cases",
+            []
+        )
+    )
+
+    total_requirements = (
+        functional + non_functional
+    )
+
+    st.subheader(
+        "📊 Requirement Summary"
+    )
+
+    st.caption(
+        "Automatically generated from the analyzed product idea."
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.metric(
+            "Total Requirements",
+            total_requirements
+        )
+
+    with c2:
+        st.metric(
+            "Functional",
+            functional
+        )
+
+    with c3:
+        st.metric(
+            "Non-Functional",
+            non_functional
+        )
+
+    with c4:
+        st.metric(
+            "User Stories",
+            user_stories
+        )
+
+    c5, c6, c7, c8 = st.columns(4)
+
+    with c5:
+        st.metric(
+            "Prioritized",
+            priorities
+        )
+
+    with c6:
+        st.metric(
+            "Gaps Found",
+            ambiguities
+        )
+
+    with c7:
+        st.metric(
+            "Test Cases",
+            test_cases
+        )
+
+    with c8:
+        st.metric(
+            "Dependencies",
+            len(
+                data.get(
+                    "technical_dependencies",
+                    []
+                )
+            )
+        )
+
+
+# =========================================================
+# REQUIREMENT TRACEABILITY MATRIX
+# =========================================================
+
+def display_traceability(data):
+
+    st.subheader(
+        "🔗 Requirement Traceability Matrix"
+    )
+
+    st.caption(
+        "Maps functional requirements to user stories and test cases."
+    )
+
+    requirements = data.get(
+        "functional_requirements",
+        []
+    )
+
+    stories = data.get(
+        "user_stories",
+        []
+    )
+
+    tests = data.get(
+        "test_cases",
+        []
+    )
+
+    if not requirements:
+
+        st.info(
+            "No functional requirements available for traceability."
+        )
+
+        return
+
+    rows = []
+
+    for i, requirement in enumerate(
+        requirements,
+        1
+    ):
+
+        # Map requirement to user story
+        if stories:
+
+            story_index = (
+                (i - 1) % len(stories)
+            ) + 1
+
+            story_text = stories[
+                story_index - 1
+            ].get(
+                "story",
+                ""
+            )
+
+            story_id = f"US-{story_index:02d}"
+
+        else:
+
+            story_text = "Not generated"
+            story_id = "—"
+
+
+        # Map requirement to test case
+        if tests:
+
+            test_index = (
+                (i - 1) % len(tests)
+            ) + 1
+
+            test_id = tests[
+                test_index - 1
+            ].get(
+                "id",
+                f"TC-{test_index:02d}"
+            )
+
+            test_scenario = tests[
+                test_index - 1
+            ].get(
+                "scenario",
+                ""
+            )
+
+        else:
+
+            test_id = "—"
+            test_scenario = "Not generated"
+
+
+        rows.append(
+            {
+                "Requirement":
+                    f"FR-{i:02d}",
+
+                "Requirement Description":
+                    requirement,
+
+                "User Story":
+                    story_id,
+
+                "Story":
+                    story_text,
+
+                "Test Case":
+                    test_id,
+
+                "Test Scenario":
+                    test_scenario
+            }
+        )
+
+    st.dataframe(
+        rows,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.info(
+        "💡 Traceability helps verify that each functional "
+        "requirement is connected to a user story and validation test."
+    )
 
 
 # =========================================================
@@ -677,96 +1059,156 @@ def display_results(data):
 
     st.write("")
 
-    st.subheader("📊 Generated Requirements")
+    # -----------------------------------------------------
+    # SUMMARY DASHBOARD
+    # -----------------------------------------------------
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+    display_summary(
+        data
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # TABS
+    # -----------------------------------------------------
+
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
         [
             "📋 Requirements",
             "👤 User Stories",
             "⚡ Priorities",
             "🔎 Gaps",
             "🧪 Test Cases",
-            "🔧 Technical"
+            "🔧 Technical",
+            "🔗 Traceability"
         ]
     )
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # REQUIREMENTS
-    # -----------------------------------------------------
+    # =====================================================
 
     with tab1:
 
-        st.markdown("### Functional Requirements")
+        st.markdown(
+            "### Functional Requirements"
+        )
 
         for i, req in enumerate(
-            data.get("functional_requirements", []),
+            data.get(
+                "functional_requirements",
+                []
+            ),
             1
         ):
 
-            with st.container(border=True):
+            with st.container(
+                border=True
+            ):
 
-                st.write(f"**FR-{i:02d}**")
+                st.write(
+                    f"**FR-{i:02d}**"
+                )
 
                 st.write(req)
 
 
-        st.markdown("### Non-Functional Requirements")
+        st.markdown(
+            "### Non-Functional Requirements"
+        )
 
         for i, req in enumerate(
-            data.get("non_functional_requirements", []),
+            data.get(
+                "non_functional_requirements",
+                []
+            ),
             1
         ):
 
-            with st.container(border=True):
+            with st.container(
+                border=True
+            ):
 
-                st.write(f"**NFR-{i:02d}**")
+                st.write(
+                    f"**NFR-{i:02d}**"
+                )
 
                 st.write(req)
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # USER STORIES
-    # -----------------------------------------------------
+    # =====================================================
 
     with tab2:
 
-        stories = data.get("user_stories", [])
+        stories = data.get(
+            "user_stories",
+            []
+        )
 
         if not stories:
 
-            st.info("No user stories generated.")
+            st.info(
+                "No user stories generated."
+            )
 
-        for i, story in enumerate(stories, 1):
+        for i, story in enumerate(
+            stories,
+            1
+        ):
 
-            with st.container(border=True):
+            with st.container(
+                border=True
+            ):
 
-                st.markdown(f"### 👤 User Story {i}")
+                st.markdown(
+                    f"### 👤 User Story {i}"
+                )
 
-                st.write(story.get("story", ""))
+                st.write(
+                    story.get(
+                        "story",
+                        ""
+                    )
+                )
 
-                criteria = story.get("acceptance_criteria", [])
+                criteria = story.get(
+                    "acceptance_criteria",
+                    []
+                )
 
                 if criteria:
 
-                    st.write("**Acceptance Criteria**")
+                    st.write(
+                        "**Acceptance Criteria**"
+                    )
 
                     for criterion in criteria:
 
-                        st.write(f"• {criterion}")
+                        st.write(
+                            f"• {criterion}"
+                        )
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # PRIORITIES
-    # -----------------------------------------------------
+    # =====================================================
 
     with tab3:
 
-        priorities = data.get("priorities", [])
+        priorities = data.get(
+            "priorities",
+            []
+        )
 
         for item in priorities:
 
-            with st.container(border=True):
+            with st.container(
+                border=True
+            ):
 
                 st.write(
                     f"**{item.get('requirement', 'Requirement')}**"
@@ -777,61 +1219,83 @@ def display_results(data):
                 )
 
                 st.caption(
-                    item.get('reason', '')
+                    item.get(
+                        "reason",
+                        ""
+                    )
                 )
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # GAPS
-    # -----------------------------------------------------
+    # =====================================================
 
     with tab4:
 
-        ambiguities = data.get("ambiguities", [])
+        ambiguities = data.get(
+            "ambiguities",
+            []
+        )
 
         if not ambiguities:
 
-            st.success("No major ambiguities detected.")
+            st.success(
+                "No major ambiguities detected."
+            )
 
         else:
 
-            for i, item in enumerate(ambiguities, 1):
+            for i, item in enumerate(
+                ambiguities,
+                1
+            ):
 
-                with st.container(border=True):
+                with st.container(
+                    border=True
+                ):
 
-                    st.write(f"🔎 **Gap {i}**")
+                    st.write(
+                        f"🔎 **Gap {i}**"
+                    )
 
                     st.write(item)
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # TEST CASES
-    # -----------------------------------------------------
+    # =====================================================
 
     with tab5:
 
-        test_cases = data.get("test_cases", [])
+        test_cases = data.get(
+            "test_cases",
+            []
+        )
 
         for test in test_cases:
 
-            with st.container(border=True):
+            with st.container(
+                border=True
+            ):
 
                 st.write(
                     f"### 🧪 {test.get('id', 'Test Case')}"
                 )
 
                 st.write(
-                    f"**Scenario:** {test.get('scenario', '')}"
+                    f"**Scenario:** "
+                    f"{test.get('scenario', '')}"
                 )
 
                 st.write(
-                    f"**Expected:** {test.get('expected', '')}"
+                    f"**Expected:** "
+                    f"{test.get('expected', '')}"
                 )
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # TECHNICAL
-    # -----------------------------------------------------
+    # =====================================================
 
     with tab6:
 
@@ -840,32 +1304,42 @@ def display_results(data):
             []
         )
 
-        st.markdown("### 🔧 Technical Dependencies")
-
         for dependency in dependencies:
 
-            st.write(f"• {dependency}")
+            st.write(
+                f"🔧 {dependency}"
+            )
 
 
-    # -----------------------------------------------------
-    # DOWNLOAD JSON
-    # -----------------------------------------------------
+    # =====================================================
+    # TRACEABILITY
+    # =====================================================
+
+    with tab7:
+
+        display_traceability(
+            data
+        )
+
+
+    # =====================================================
+    # DOWNLOAD
+    # =====================================================
 
     st.divider()
 
+    json_data = json.dumps(
+        data,
+        indent=2,
+        ensure_ascii=False
+    )
+
     st.download_button(
-
-        label="⬇️ Download Requirements JSON",
-
-        data=json.dumps(
-            data,
-            indent=2,
-            ensure_ascii=False
-        ),
-
+        "📥 Download Requirements Report",
+        data=json_data,
         file_name="reqpilot_requirements.json",
-
-        mime="application/json"
+        mime="application/json",
+        use_container_width=True
     )
 
 
@@ -877,19 +1351,17 @@ st.write("")
 
 col1, col2 = st.columns(2)
 
-
 with col1:
 
-    analyze_button = st.button(
+    analyze = st.button(
         "⚡ Analyze Requirements",
         type="primary",
         use_container_width=True
     )
 
-
 with col2:
 
-    demo_button = st.button(
+    demo = st.button(
         "🎬 Demo Mode",
         use_container_width=True
     )
@@ -899,24 +1371,24 @@ with col2:
 # LIVE AI ANALYSIS
 # =========================================================
 
-if analyze_button:
+if analyze:
 
     if not idea.strip():
 
         st.warning(
-            "Please enter a product or startup idea first."
+            "⚠️ Please enter a product idea first."
         )
 
     elif not api_key:
 
         st.error(
-            "Gemini API key not found. Add GEMINI_API_KEY in Streamlit Secrets."
+            "❌ Gemini API key is required."
         )
 
     else:
 
         with st.spinner(
-            "🤖 ReqPilot is analyzing your requirements..."
+            "🤖 Analyzing requirements..."
         ):
 
             try:
@@ -927,97 +1399,42 @@ if analyze_button:
                 )
 
                 st.success(
-                    "✅ Requirements successfully generated!"
+                    "✅ Requirements generated successfully!"
                 )
 
-                display_results(result)
+                display_results(
+                    result
+                )
 
             except Exception as e:
 
-                error_text = str(e)
-
-                if "503" in error_text or "UNAVAILABLE" in error_text:
-
-                    st.error(
-                        "Gemini is temporarily unavailable. "
-                        "Please try again or use Demo Mode."
-                    )
-
-                elif (
-                    "429" in error_text
-                    or "quota" in error_text.lower()
-                ):
-
-                    st.error(
-                        "Gemini API quota/rate limit reached. "
-                        "Please try again later or use Demo Mode."
-                    )
-
-                else:
-
-                    st.error(
-                        f"Execution Error: {error_text}"
-                    )
+                st.error(
+                    f"❌ AI analysis failed: {e}"
+                )
 
 
 # =========================================================
 # DEMO MODE
 # =========================================================
 
-if demo_button:
+if demo:
 
-    st.success(
-        "🎬 Demo Mode activated — showing QuickCart example."
-    )
+    if preset == "QuickCart Grocery Platform":
 
-    display_results(demo_data)
-
-
-# =========================================================
-# FEATURES
-# =========================================================
-
-st.write("")
-st.divider()
-
-st.subheader("✨ Core Capabilities")
-
-c1, c2, c3 = st.columns(3)
-
-
-with c1:
-
-    with st.container(border=True):
-
-        st.markdown("### 🧩 Requirement Extraction")
-
-        st.write(
-            "Converts an informal product idea into structured "
-            "functional and non-functional requirements."
+        st.success(
+            "🎬 QuickCart Demo Mode activated"
         )
 
-
-with c2:
-
-    with st.container(border=True):
-
-        st.markdown("### 🔎 Ambiguity Detection")
-
-        st.write(
-            "Identifies missing decisions and unclear requirements "
-            "before development begins."
+        display_results(
+            demo_data
         )
 
+    else:
 
-with c3:
-
-    with st.container(border=True):
-
-        st.markdown("### 🧪 Test Generation")
-
-        st.write(
-            "Creates practical test scenarios from the generated "
-            "requirements."
+        st.info(
+            "🎬 Demo Mode currently contains the "
+            "QuickCart sample. Select QuickCart Grocery "
+            "Platform from the Demo Preset."
         )
 
 
@@ -1029,14 +1446,17 @@ st.write("")
 
 with st.container(border=True):
 
-    st.subheader("🧠 Technical Contribution")
+    st.subheader(
+        "🧠 Technical Contribution"
+    )
 
     st.write(
         "Our solution is not just a generic API wrapper. "
-        "ReqPilot uses a structured multi-stage requirements analysis "
-        "pipeline covering requirement classification, ambiguity detection, "
-        "prioritization, user-story generation and test-case generation "
-        "from a single project description."
+        "ReqPilot uses a structured multi-stage requirements "
+        "analysis pipeline covering requirement classification, "
+        "ambiguity detection, prioritization, user-story "
+        "generation, test-case generation and requirement "
+        "traceability from a single project description."
     )
 
 
@@ -1047,5 +1467,5 @@ with st.container(border=True):
 st.write("")
 
 st.caption(
-    "ReqPilot • AI Requirements Engineering Agent • G14"
+    "🚀 ReqPilot • AI Requirements Engineering Agent • G14"
 )

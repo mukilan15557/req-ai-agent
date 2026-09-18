@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 # =========================================================
-# GLASS UI
+# GLASS UI CSS
 # =========================================================
 
 st.markdown("""
@@ -39,6 +39,9 @@ st.markdown("""
     padding-bottom: 3rem;
 }
 
+
+/* Glass containers */
+
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: rgba(255, 255, 255, 0.055);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -50,6 +53,9 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
     padding: 8px;
 }
+
+
+/* Headings */
 
 h1 {
     font-size: 3.2rem !important;
@@ -65,9 +71,15 @@ h3 {
     font-weight: 700 !important;
 }
 
+
+/* Normal text */
+
 p {
     color: rgba(240, 243, 255, 0.78);
 }
+
+
+/* Buttons */
 
 .stButton > button {
     border-radius: 14px;
@@ -85,6 +97,9 @@ p {
     transform: translateY(-1px);
 }
 
+
+/* Primary button */
+
 .stButton > button[kind="primary"] {
     background: linear-gradient(
         135deg,
@@ -94,6 +109,9 @@ p {
     border: 1px solid rgba(255,255,255,0.18);
 }
 
+
+/* Text area */
+
 textarea {
     background: rgba(255,255,255,0.055) !important;
     border: 1px solid rgba(255,255,255,0.12) !important;
@@ -101,11 +119,17 @@ textarea {
     color: white !important;
 }
 
+
+/* Select boxes */
+
 div[data-baseweb="select"] > div {
     background: rgba(255,255,255,0.06);
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.12);
 }
+
+
+/* Metrics */
 
 div[data-testid="stMetric"] {
     background: rgba(255,255,255,0.045);
@@ -113,6 +137,9 @@ div[data-testid="stMetric"] {
     padding: 14px;
     border-radius: 16px;
 }
+
+
+/* Tabs */
 
 button[data-baseweb="tab"] {
     color: rgba(255,255,255,0.7);
@@ -122,13 +149,26 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: white;
 }
 
+
+/* Sidebar */
+
 section[data-testid="stSidebar"] {
     background: rgba(7, 9, 18, 0.82);
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
+
+/* Divider */
+
 hr {
     border-color: rgba(255,255,255,0.08);
+}
+
+
+/* Code blocks */
+
+code {
+    border-radius: 8px;
 }
 
 </style>
@@ -153,9 +193,7 @@ with st.sidebar:
     try:
         api_key = st.secrets["GEMINI_API_KEY"]
         st.success("API Key Loaded from Secrets")
-
     except Exception:
-
         api_key = st.text_input(
             "Gemini API Key",
             type="password",
@@ -164,14 +202,16 @@ with st.sidebar:
 
     st.divider()
 
-    st.subheader("🎬 Demo Scenario")
+    st.subheader("🎬 Demo Preset")
 
     preset = st.selectbox(
-        "Choose a product",
+        "Choose a product idea",
         [
             "Custom Idea",
-            "🛒 QuickCart — Grocery Delivery",
-            "⚡ EVCharge — EV Charging Platform"
+            "QuickCart Grocery Platform",
+            "AI Fitness Platform",
+            "EV Charging Platform",
+            "Student Learning Platform"
         ]
     )
 
@@ -197,7 +237,7 @@ with st.sidebar:
 
 demo_inputs = {
 
-    "🛒 QuickCart — Grocery Delivery": """
+    "QuickCart Grocery Platform": """
 We want to build QuickCart, a grocery delivery platform.
 
 Users should be able to create accounts, browse and search for groceries,
@@ -208,18 +248,22 @@ The platform should securely handle user information and payments, support
 multiple users, and provide a reliable shopping experience.
 """,
 
-    "⚡ EVCharge — EV Charging Platform": """
-We want to build EVCharge, an EV charging platform.
+    "AI Fitness Platform": """
+We want to build an AI fitness platform where users can create profiles,
+set fitness goals, follow personalized workout plans, track progress,
+and receive recommendations based on their activity.
+""",
 
-Electric vehicle owners should be able to find nearby charging stations,
-check real-time availability, reserve a charging slot, make online payments,
-and receive notifications when charging is complete.
+    "EV Charging Platform": """
+We want to build an EV charging platform where electric vehicle owners
+can find nearby charging stations, check availability, reserve a charging
+slot, make payments, and receive notifications when charging is complete.
+""",
 
-Station operators should be able to manage charging stations, monitor usage,
-and update station availability.
-
-The platform should securely handle user information and payments and
-provide reliable real-time charging information.
+    "Student Learning Platform": """
+We want to build a student learning platform where students can access
+courses, watch lessons, complete quizzes, track their progress, and receive
+personalized learning recommendations.
 """
 }
 
@@ -235,18 +279,17 @@ with st.container(border=True):
     st.title("🚀 ReqPilot")
 
     st.write(
-        "Turn an informal product idea into structured, "
-        "development-ready software requirements using AI."
+        "Turn an informal product idea into structured, development-ready "
+        "software requirements using AI."
     )
 
     st.write(
-        "Requirements • User Stories • Priorities • Gaps • "
-        "Test Cases • Dependencies"
+        "Requirements • User Stories • Priorities • Gaps • Test Cases • Dependencies"
     )
 
 
 # =========================================================
-# INPUT
+# INPUT SECTION
 # =========================================================
 
 st.write("")
@@ -269,7 +312,8 @@ with st.container(border=True):
         value=default_text,
         height=190,
         placeholder=(
-            "Example: We want to build an online platform where users can..."
+            "Example: We want to build an online grocery delivery "
+            "platform where users can..."
         ),
         label_visibility="collapsed"
     )
@@ -301,7 +345,6 @@ with m4:
 # =========================================================
 
 st.write("")
-
 st.subheader("🔄 Requirement Intelligence Pipeline")
 
 pipeline = [
@@ -331,258 +374,193 @@ for col, item in zip(cols, pipeline):
 
 
 # =========================================================
-# QUICKCART DEMO DATA
+# DEMO DATA
 # =========================================================
 
-quickcart_data = {
+demo_data = {
 
     "functional_requirements": [
+
         "Users should be able to create an account and securely log in.",
+
         "Users should be able to browse groceries by category and search for products.",
+
         "Users should be able to add products to a shopping cart and update quantities.",
+
         "Users should be able to place orders and make online payments.",
-        "Users should be able to view order status and track delivery.",
+
+        "Users should be able to view their order status and track delivery.",
+
         "The system should send notifications for order confirmation and delivery updates."
     ],
 
     "non_functional_requirements": [
+
         "User payment and personal information must be securely protected.",
+
         "The application should provide fast response times during normal usage.",
+
         "The system should remain available during high-demand periods.",
+
         "The application should support multiple users placing orders simultaneously."
     ],
 
     "user_stories": [
+
         {
-            "story": "As a customer, I want to search for groceries so that I can quickly find the products I need.",
+            "story":
+                "As a customer, I want to search for groceries so that I can quickly find the products I need.",
+
             "acceptance_criteria": [
+
                 "Given the user is on the product page, when they enter a product name, then matching products should be displayed.",
+
                 "Given no matching product exists, when the user searches, then a suitable message should be displayed."
             ]
         },
+
         {
-            "story": "As a customer, I want to place an online order so that I can receive groceries at my preferred address.",
+            "story":
+                "As a customer, I want to place an online order so that I can receive groceries at my preferred address.",
+
             "acceptance_criteria": [
+
                 "Given the cart contains products, when the user confirms the order and payment succeeds, then the order should be created.",
+
                 "Given payment fails, when the user attempts to place the order, then the order should not be confirmed."
             ]
         },
+
         {
-            "story": "As a customer, I want to track my order so that I know its current delivery status.",
+            "story":
+                "As a customer, I want to track my order so that I know its current delivery status.",
+
             "acceptance_criteria": [
+
                 "Given an order has been placed, when the user opens order tracking, then the current order status should be displayed.",
+
                 "The user should receive updates when the delivery status changes."
             ]
         }
     ],
 
     "priorities": [
+
         {
             "requirement": "User registration and login",
             "priority": "Must Have",
-            "reason": "Users need secure accounts to manage orders and personal information."
+            "reason":
+                "Users need secure accounts to manage orders and personal information."
         },
+
         {
             "requirement": "Product search and browsing",
             "priority": "Must Have",
-            "reason": "Customers need to find products before placing an order."
+            "reason":
+                "Customers need to find products before placing an order."
         },
+
         {
             "requirement": "Shopping cart",
             "priority": "Must Have",
-            "reason": "Customers need to select and manage products before checkout."
+            "reason":
+                "Customers need to select and manage products before checkout."
         },
+
         {
             "requirement": "Online payment",
             "priority": "Must Have",
-            "reason": "Payment is required to complete an online order."
+            "reason":
+                "Payment is required to complete an online order."
         },
+
         {
             "requirement": "Order tracking",
             "priority": "Should Have",
-            "reason": "Tracking improves delivery visibility and customer experience."
+            "reason":
+                "Tracking improves delivery visibility and customer experience."
         },
+
         {
-            "requirement": "Personalized recommendations",
+            "requirement": "Personalized product recommendations",
             "priority": "Could Have",
-            "reason": "Recommendations improve discovery but are not required for the core ordering flow."
+            "reason":
+                "Recommendations can improve product discovery but are not required for the core ordering flow."
         }
     ],
 
     "ambiguities": [
+
         "Which payment methods should be supported?",
-        "What delivery areas should be supported?",
-        "What happens when a product becomes unavailable after being added to the cart?",
+
+        "What delivery areas and geographical locations should be supported?",
+
+        "What happens when a product becomes unavailable after the user adds it to the cart?",
+
         "Should users be able to cancel an order after payment?",
+
         "What is the expected delivery time?",
-        "Should notifications use SMS, email, push notifications, or all three?"
+
+        "Should notifications be sent through SMS, email, push notifications, or all three?"
     ],
 
     "test_cases": [
+
         {
             "id": "TC-01",
             "scenario": "User searches for an available grocery product.",
-            "expected": "Matching products should be displayed with name, price, and availability."
+            "expected":
+                "Matching products should be displayed with product name, price, and availability."
         },
+
         {
             "id": "TC-02",
-            "scenario": "User changes product quantity in the cart.",
-            "expected": "Cart quantity and total price should update correctly."
+            "scenario":
+                "User adds products to the cart and changes the quantity.",
+            "expected":
+                "Cart quantity and total price should update correctly."
         },
+
         {
             "id": "TC-03",
-            "scenario": "User completes checkout with successful payment.",
-            "expected": "The order should be created and confirmation displayed."
+            "scenario":
+                "User completes checkout with a successful payment.",
+            "expected":
+                "The order should be created and an order confirmation should be displayed."
         },
+
         {
             "id": "TC-04",
-            "scenario": "Payment fails during checkout.",
-            "expected": "The order should not be confirmed."
+            "scenario":
+                "Payment fails during checkout.",
+            "expected":
+                "The order should not be confirmed and the user should receive an appropriate error message."
         },
+
         {
             "id": "TC-05",
-            "scenario": "User opens tracking for an existing order.",
-            "expected": "The current delivery status should be displayed."
+            "scenario":
+                "User opens tracking for an existing order.",
+            "expected":
+                "The current delivery status should be displayed."
         }
     ],
 
     "technical_dependencies": [
+
         "User authentication and authorization",
+
         "Product and inventory database",
+
         "Shopping cart and order management backend",
+
         "Payment gateway API",
-        "Delivery tracking service",
+
+        "Delivery and order tracking service",
+
         "Notification service",
+
         "Web or mobile frontend"
-    ]
-}
-
-
-# =========================================================
-# EVCHARGE DEMO DATA
-# =========================================================
-
-evcharge_data = {
-
-    "functional_requirements": [
-        "Users should be able to create an account and securely log in.",
-        "Users should be able to search for nearby EV charging stations.",
-        "Users should be able to view charging station availability in real time.",
-        "Users should be able to reserve an available charging slot.",
-        "Users should be able to make online payments for charging sessions.",
-        "Users should receive notifications about reservation and charging status.",
-        "Station operators should be able to update station availability and manage charging points."
-    ],
-
-    "non_functional_requirements": [
-        "User payment and personal information must be securely protected.",
-        "Charging station availability should be updated with low latency.",
-        "The platform should remain reliable during periods of high usage.",
-        "The system should support multiple users accessing station information simultaneously."
-    ],
-
-    "user_stories": [
-        {
-            "story": "As an EV owner, I want to find nearby charging stations so that I can choose a convenient location.",
-            "acceptance_criteria": [
-                "Given location access is available, when the user searches for charging stations, then nearby stations should be displayed.",
-                "Stations should show availability information."
-            ]
-        },
-        {
-            "story": "As an EV owner, I want to reserve a charging slot so that I can charge my vehicle without waiting.",
-            "acceptance_criteria": [
-                "Given a charging slot is available, when the user selects a time and confirms the reservation, then the slot should be reserved.",
-                "A confirmation should be shown after successful reservation."
-            ]
-        },
-        {
-            "story": "As a station operator, I want to update charger availability so that customers see accurate station information.",
-            "acceptance_criteria": [
-                "Given the operator is authenticated, when charger status is updated, then the new availability should be reflected for users.",
-                "Unauthorized users should not be able to modify station information."
-            ]
-        }
-    ],
-
-    "priorities": [
-        {
-            "requirement": "User registration and login",
-            "priority": "Must Have",
-            "reason": "Secure accounts are required to manage reservations and payments."
-        },
-        {
-            "requirement": "Charging station search",
-            "priority": "Must Have",
-            "reason": "Users need to locate charging stations."
-        },
-        {
-            "requirement": "Real-time station availability",
-            "priority": "Must Have",
-            "reason": "Availability information is essential for choosing a usable charger."
-        },
-        {
-            "requirement": "Slot reservation",
-            "priority": "Must Have",
-            "reason": "Reservation is a core feature of the platform."
-        },
-        {
-            "requirement": "Online payment",
-            "priority": "Must Have",
-            "reason": "Charging sessions require payment processing."
-        },
-        {
-            "requirement": "Charging recommendations",
-            "priority": "Could Have",
-            "reason": "Recommendations can improve the user experience but are not required for the core platform."
-        }
-    ],
-
-    "ambiguities": [
-        "Which EV charging standards and connector types should be supported?",
-        "How frequently should station availability be updated?",
-        "Should reservations have a cancellation or refund policy?",
-        "Which payment methods should be supported?",
-        "How long can a user reserve a charging slot?",
-        "Should the platform support roaming across different charging networks?"
-    ],
-
-    "test_cases": [
-        {
-            "id": "TC-01",
-            "scenario": "User searches for nearby charging stations.",
-            "expected": "Nearby charging stations should be displayed with availability information."
-        },
-        {
-            "id": "TC-02",
-            "scenario": "User reserves an available charging slot.",
-            "expected": "The slot should be reserved and confirmation displayed."
-        },
-        {
-            "id": "TC-03",
-            "scenario": "User attempts to reserve an unavailable slot.",
-            "expected": "The reservation should be rejected and the user should see an appropriate message."
-        },
-        {
-            "id": "TC-04",
-            "scenario": "User completes a charging payment successfully.",
-            "expected": "The payment should be recorded and the charging session should be confirmed."
-        },
-        {
-            "id": "TC-05",
-            "scenario": "Station operator changes charger availability.",
-            "expected": "The updated status should be visible to users."
-        }
-    ],
-
-    "technical_dependencies": [
-        "User authentication and authorization",
-        "Charging station database",
-        "Real-time station availability API",
-        "Maps/location service",
-        "Payment gateway API",
-        "Reservation management backend",
-        "Notification service"
     ]
 }
 
@@ -631,16 +609,17 @@ Return ONLY valid JSON using exactly this structure:
 
 Rules:
 
-1. Extract functional requirements.
+1. Extract clear functional requirements.
 2. Extract realistic non-functional requirements.
 3. Generate Agile-style user stories.
 4. Include Given/When/Then style acceptance criteria where useful.
-5. Use MoSCoW priorities.
+5. Prioritize requirements using MoSCoW:
+   Must Have, Should Have, Could Have, Won't Have.
 6. Identify missing or ambiguous requirements.
 7. Generate practical test cases.
-8. Identify technical dependencies.
+8. Identify realistic technical dependencies.
 9. Do not invent unnecessary features.
-10. Keep the output concise and suitable for a development team.
+10. Keep the output concise and suitable for a software development team.
 """
 
 
@@ -682,9 +661,7 @@ def analyze_with_gemini(idea, key):
             if "503" in error_text or "UNAVAILABLE" in error_text:
 
                 if attempt < 2:
-
                     time.sleep(2 ** attempt)
-
                     continue
 
             raise last_error
@@ -714,7 +691,9 @@ def display_results(data):
     )
 
 
+    # -----------------------------------------------------
     # REQUIREMENTS
+    # -----------------------------------------------------
 
     with tab1:
 
@@ -746,11 +725,17 @@ def display_results(data):
                 st.write(req)
 
 
+    # -----------------------------------------------------
     # USER STORIES
+    # -----------------------------------------------------
 
     with tab2:
 
         stories = data.get("user_stories", [])
+
+        if not stories:
+
+            st.info("No user stories generated.")
 
         for i, story in enumerate(stories, 1):
 
@@ -760,10 +745,7 @@ def display_results(data):
 
                 st.write(story.get("story", ""))
 
-                criteria = story.get(
-                    "acceptance_criteria",
-                    []
-                )
+                criteria = story.get("acceptance_criteria", [])
 
                 if criteria:
 
@@ -774,7 +756,9 @@ def display_results(data):
                         st.write(f"• {criterion}")
 
 
+    # -----------------------------------------------------
     # PRIORITIES
+    # -----------------------------------------------------
 
     with tab3:
 
@@ -793,49 +777,40 @@ def display_results(data):
                 )
 
                 st.caption(
-                    item.get("reason", "")
+                    item.get('reason', '')
                 )
 
 
+    # -----------------------------------------------------
     # GAPS
+    # -----------------------------------------------------
 
     with tab4:
 
-        ambiguities = data.get(
-            "ambiguities",
-            []
-        )
+        ambiguities = data.get("ambiguities", [])
 
         if not ambiguities:
 
-            st.success(
-                "No major ambiguities detected."
-            )
+            st.success("No major ambiguities detected.")
 
         else:
 
-            for i, item in enumerate(
-                ambiguities,
-                1
-            ):
+            for i, item in enumerate(ambiguities, 1):
 
                 with st.container(border=True):
 
-                    st.write(
-                        f"🔎 **Gap {i}**"
-                    )
+                    st.write(f"🔎 **Gap {i}**")
 
                     st.write(item)
 
 
+    # -----------------------------------------------------
     # TEST CASES
+    # -----------------------------------------------------
 
     with tab5:
 
-        test_cases = data.get(
-            "test_cases",
-            []
-        )
+        test_cases = data.get("test_cases", [])
 
         for test in test_cases:
 
@@ -854,7 +829,9 @@ def display_results(data):
                 )
 
 
+    # -----------------------------------------------------
     # TECHNICAL
+    # -----------------------------------------------------
 
     with tab6:
 
@@ -863,18 +840,16 @@ def display_results(data):
             []
         )
 
-        st.markdown(
-            "### 🔧 Technical Dependencies"
-        )
+        st.markdown("### 🔧 Technical Dependencies")
 
         for dependency in dependencies:
 
-            st.write(
-                f"• {dependency}"
-            )
+            st.write(f"• {dependency}")
 
 
-    # DOWNLOAD
+    # -----------------------------------------------------
+    # DOWNLOAD JSON
+    # -----------------------------------------------------
 
     st.divider()
 
@@ -895,7 +870,7 @@ def display_results(data):
 
 
 # =========================================================
-# BUTTONS
+# ACTION BUTTONS
 # =========================================================
 
 st.write("")
@@ -921,7 +896,7 @@ with col2:
 
 
 # =========================================================
-# LIVE AI
+# LIVE AI ANALYSIS
 # =========================================================
 
 if analyze_button:
@@ -935,8 +910,7 @@ if analyze_button:
     elif not api_key:
 
         st.error(
-            "Gemini API key not found. "
-            "Add GEMINI_API_KEY in Streamlit Secrets."
+            "Gemini API key not found. Add GEMINI_API_KEY in Streamlit Secrets."
         )
 
     else:
@@ -962,10 +936,7 @@ if analyze_button:
 
                 error_text = str(e)
 
-                if (
-                    "503" in error_text
-                    or "UNAVAILABLE" in error_text
-                ):
+                if "503" in error_text or "UNAVAILABLE" in error_text:
 
                     st.error(
                         "Gemini is temporarily unavailable. "
@@ -995,40 +966,18 @@ if analyze_button:
 
 if demo_button:
 
-    if preset == "🛒 QuickCart — Grocery Delivery":
+    st.success(
+        "🎬 Demo Mode activated — showing QuickCart example."
+    )
 
-        st.success(
-            "🛒 QuickCart Demo activated."
-        )
-
-        display_results(
-            quickcart_data
-        )
-
-    elif preset == "⚡ EVCharge — EV Charging Platform":
-
-        st.success(
-            "⚡ EVCharge Demo activated."
-        )
-
-        display_results(
-            evcharge_data
-        )
-
-    elif preset == "Custom Idea":
-
-        st.info(
-            "Please select QuickCart or EVCharge "
-            "from the Demo Scenario menu."
-        )
+    display_results(demo_data)
 
 
 # =========================================================
-# CORE CAPABILITIES
+# FEATURES
 # =========================================================
 
 st.write("")
-
 st.divider()
 
 st.subheader("✨ Core Capabilities")
@@ -1040,13 +989,11 @@ with c1:
 
     with st.container(border=True):
 
-        st.markdown(
-            "### 🧩 Requirement Extraction"
-        )
+        st.markdown("### 🧩 Requirement Extraction")
 
         st.write(
-            "Converts an informal product idea into "
-            "structured functional and non-functional requirements."
+            "Converts an informal product idea into structured "
+            "functional and non-functional requirements."
         )
 
 
@@ -1054,13 +1001,11 @@ with c2:
 
     with st.container(border=True):
 
-        st.markdown(
-            "### 🔎 Ambiguity Detection"
-        )
+        st.markdown("### 🔎 Ambiguity Detection")
 
         st.write(
-            "Identifies missing decisions and unclear "
-            "requirements before development begins."
+            "Identifies missing decisions and unclear requirements "
+            "before development begins."
         )
 
 
@@ -1068,13 +1013,11 @@ with c3:
 
     with st.container(border=True):
 
-        st.markdown(
-            "### 🧪 Test Generation"
-        )
+        st.markdown("### 🧪 Test Generation")
 
         st.write(
-            "Creates practical test scenarios from "
-            "the generated requirements."
+            "Creates practical test scenarios from the generated "
+            "requirements."
         )
 
 
@@ -1090,10 +1033,10 @@ with st.container(border=True):
 
     st.write(
         "Our solution is not just a generic API wrapper. "
-        "ReqPilot uses a structured multi-stage requirements "
-        "analysis pipeline covering requirement classification, "
-        "ambiguity detection, prioritization, user-story generation "
-        "and test-case generation from a single project description."
+        "ReqPilot uses a structured multi-stage requirements analysis "
+        "pipeline covering requirement classification, ambiguity detection, "
+        "prioritization, user-story generation and test-case generation "
+        "from a single project description."
     )
 
 

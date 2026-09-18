@@ -720,10 +720,302 @@ def analyze_with_gemini(idea, key):
 
 
 # =========================================================
+# SUMMARY DASHBOARD
+# =========================================================
+
+def display_summary(data):
+
+    fr_count = len(
+        data.get("functional_requirements", [])
+    )
+
+    nfr_count = len(
+        data.get("non_functional_requirements", [])
+    )
+
+    story_count = len(
+        data.get("user_stories", [])
+    )
+
+    gap_count = len(
+        data.get("ambiguities", [])
+    )
+
+    test_count = len(
+        data.get("test_cases", [])
+    )
+
+    dependency_count = len(
+        data.get("technical_dependencies", [])
+    )
+
+    st.subheader("📊 Requirement Summary")
+
+    s1, s2, s3 = st.columns(3)
+
+    with s1:
+        st.metric(
+            "Functional Requirements",
+            fr_count
+        )
+
+    with s2:
+        st.metric(
+            "Non-Functional Requirements",
+            nfr_count
+        )
+
+    with s3:
+        st.metric(
+            "User Stories",
+            story_count
+        )
+
+    s4, s5, s6 = st.columns(3)
+
+    with s4:
+        st.metric(
+            "Ambiguities / Gaps",
+            gap_count
+        )
+
+    with s5:
+        st.metric(
+            "Test Cases",
+            test_count
+        )
+
+    with s6:
+        st.metric(
+            "Dependencies",
+            dependency_count
+        )
+
+
+# =========================================================
+# TRACEABILITY MATRIX
+# =========================================================
+
+def display_traceability(data):
+
+    st.subheader("🔗 Requirement Traceability Matrix")
+
+    functional = data.get(
+        "functional_requirements",
+        []
+    )
+
+    stories = data.get(
+        "user_stories",
+        []
+    )
+
+    tests = data.get(
+        "test_cases",
+        []
+    )
+
+    max_rows = max(
+        len(functional),
+        len(stories),
+        len(tests)
+    )
+
+    if max_rows == 0:
+
+        st.info(
+            "No requirements available for traceability."
+        )
+
+        return
+
+    rows = []
+
+    for i in range(max_rows):
+
+        requirement_id = (
+            f"FR-{i + 1:02d}"
+            if i < len(functional)
+            else "-"
+        )
+
+        requirement = (
+            functional[i]
+            if i < len(functional)
+            else "-"
+        )
+
+        story_id = (
+            f"US-{i + 1:02d}"
+            if i < len(stories)
+            else "-"
+        )
+
+        story = (
+            stories[i].get("story", "")
+            if i < len(stories)
+            else "-"
+        )
+
+        test_id = (
+            tests[i].get("id", f"TC-{i + 1:02d}")
+            if i < len(tests)
+            else "-"
+        )
+
+        rows.append({
+            "Requirement": requirement_id,
+            "Requirement Description": requirement,
+            "User Story": story_id,
+            "User Story Description": story,
+            "Test Case": test_id
+        })
+
+    st.dataframe(
+        rows,
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+# =========================================================
+# DOWNLOAD REPORT
+# =========================================================
+
+def create_report(data):
+
+    report = []
+
+    report.append("REQPILOT - AI REQUIREMENTS ENGINEERING REPORT")
+    report.append("=" * 60)
+    report.append("")
+
+    report.append("FUNCTIONAL REQUIREMENTS")
+    report.append("-" * 30)
+
+    for i, req in enumerate(
+        data.get("functional_requirements", []),
+        1
+    ):
+        report.append(
+            f"FR-{i:02d}: {req}"
+        )
+
+    report.append("")
+
+    report.append("NON-FUNCTIONAL REQUIREMENTS")
+    report.append("-" * 30)
+
+    for i, req in enumerate(
+        data.get("non_functional_requirements", []),
+        1
+    ):
+        report.append(
+            f"NFR-{i:02d}: {req}"
+        )
+
+    report.append("")
+
+    report.append("USER STORIES")
+    report.append("-" * 30)
+
+    for i, story in enumerate(
+        data.get("user_stories", []),
+        1
+    ):
+
+        report.append(
+            f"US-{i:02d}: {story.get('story', '')}"
+        )
+
+        for criterion in story.get(
+            "acceptance_criteria",
+            []
+        ):
+
+            report.append(
+                f"  - {criterion}"
+            )
+
+    report.append("")
+
+    report.append("PRIORITIES")
+    report.append("-" * 30)
+
+    for item in data.get("priorities", []):
+
+        report.append(
+            f"{item.get('requirement', '')} "
+            f"→ {item.get('priority', '')}"
+        )
+
+        report.append(
+            f"Reason: {item.get('reason', '')}"
+        )
+
+    report.append("")
+
+    report.append("AMBIGUITIES / GAPS")
+    report.append("-" * 30)
+
+    for item in data.get(
+        "ambiguities",
+        []
+    ):
+
+        report.append(
+            f"- {item}"
+        )
+
+    report.append("")
+
+    report.append("TEST CASES")
+    report.append("-" * 30)
+
+    for test in data.get(
+        "test_cases",
+        []
+    ):
+
+        report.append(
+            f"{test.get('id', '')}: "
+            f"{test.get('scenario', '')}"
+        )
+
+        report.append(
+            f"Expected: {test.get('expected', '')}"
+        )
+
+    report.append("")
+
+    report.append("TECHNICAL DEPENDENCIES")
+    report.append("-" * 30)
+
+    for dependency in data.get(
+        "technical_dependencies",
+        []
+    ):
+
+        report.append(
+            f"- {dependency}"
+        )
+
+    return "\n".join(report)
+
+
+# =========================================================
 # DISPLAY RESULTS
 # =========================================================
 
 def display_results(data):
+
+    st.write("")
+
+    display_summary(data)
+
+    st.write("")
+
+    display_traceability(data)
 
     st.write("")
 
@@ -781,19 +1073,31 @@ def display_results(data):
 
     with tab2:
 
-        stories = data.get("user_stories", [])
+        stories = data.get(
+            "user_stories",
+            []
+        )
 
         if not stories:
 
-            st.info("No user stories generated.")
+            st.info(
+                "No user stories generated."
+            )
 
-        for i, story in enumerate(stories, 1):
+        for i, story in enumerate(
+            stories,
+            1
+        ):
 
             with st.container(border=True):
 
-                st.markdown(f"### 👤 User Story {i}")
+                st.markdown(
+                    f"### 👤 User Story {i}"
+                )
 
-                st.write(story.get("story", ""))
+                st.write(
+                    story.get("story", "")
+                )
 
                 criteria = story.get(
                     "acceptance_criteria",
@@ -802,11 +1106,15 @@ def display_results(data):
 
                 if criteria:
 
-                    st.write("**Acceptance Criteria**")
+                    st.write(
+                        "**Acceptance Criteria**"
+                    )
 
                     for criterion in criteria:
 
-                        st.write(f"• {criterion}")
+                        st.write(
+                            f"• {criterion}"
+                        )
 
 
     # -----------------------------------------------------
@@ -815,7 +1123,10 @@ def display_results(data):
 
     with tab3:
 
-        priorities = data.get("priorities", [])
+        priorities = data.get(
+            "priorities",
+            []
+        )
 
         for item in priorities:
 
@@ -840,19 +1151,29 @@ def display_results(data):
 
     with tab4:
 
-        ambiguities = data.get("ambiguities", [])
+        ambiguities = data.get(
+            "ambiguities",
+            []
+        )
 
         if not ambiguities:
 
-            st.success("No major ambiguities detected.")
+            st.success(
+                "No major ambiguities detected."
+            )
 
         else:
 
-            for i, item in enumerate(ambiguities, 1):
+            for i, item in enumerate(
+                ambiguities,
+                1
+            ):
 
                 with st.container(border=True):
 
-                    st.write(f"🔎 **Gap {i}**")
+                    st.write(
+                        f"🔎 **Gap {i}**"
+                    )
 
                     st.write(item)
 
@@ -863,7 +1184,10 @@ def display_results(data):
 
     with tab5:
 
-        test_cases = data.get("test_cases", [])
+        test_cases = data.get(
+            "test_cases",
+            []
+        )
 
         for test in test_cases:
 
@@ -874,11 +1198,13 @@ def display_results(data):
                 )
 
                 st.write(
-                    f"**Scenario:** {test.get('scenario', '')}"
+                    f"**Scenario:** "
+                    f"{test.get('scenario', '')}"
                 )
 
                 st.write(
-                    f"**Expected:** {test.get('expected', '')}"
+                    f"**Expected:** "
+                    f"{test.get('expected', '')}"
                 )
 
 
@@ -897,7 +1223,45 @@ def display_results(data):
 
             with st.container(border=True):
 
-                st.write(f"🔧 {dependency}")
+                st.write(
+                    f"🔧 {dependency}"
+                )
+
+
+    # =====================================================
+    # DOWNLOAD
+    # =====================================================
+
+    st.write("")
+
+    st.subheader("📥 Export")
+
+    report = create_report(data)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.download_button(
+            "📥 Download Report",
+            data=report,
+            file_name="reqpilot_requirements_report.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
+
+    with col2:
+
+        st.download_button(
+            "📦 Download JSON",
+            data=json.dumps(
+                data,
+                indent=4
+            ),
+            file_name="reqpilot_requirements.json",
+            mime="application/json",
+            use_container_width=True
+        )
 
 
 # =========================================================

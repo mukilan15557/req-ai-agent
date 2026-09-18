@@ -788,3 +788,75 @@ Rules:
                     file_name="requirements.json",
                     mime="application/json",
                     use_container_width=True
+                )
+
+
+            except Exception as e:
+
+                st.error(
+                    "⚠️ AI returned an unexpected format."
+                )
+
+                st.code(
+                    response.text,
+                    language="text"
+                )
+
+                st.caption(
+                    f"Parsing error: {e}"
+                )
+
+
+# ============================================================
+# FEATURES SECTION
+# ============================================================
+
+if not generate_btn:
+
+    st.markdown("---")
+
+    st.subheader("✨ What FoundersPRD Does")
+
+    f1, f2, f3 = st.columns(3)
+
+    with f1:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <div class="feature-title">
+                Requirement Extraction
+            </div>
+            <div class="feature-text">
+                Converts raw project ideas into structured
+                functional and non-functional requirements.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with f2:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">👤</div>
+            <div class="feature-title">
+                Agile User Stories
+            </div>
+            <div class="feature-text">
+                Generates user stories with acceptance
+                criteria for development teams.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with f3:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">🧪</div>
+            <div class="feature-title">
+                Test Case Generation
+            </div>
+            <div class="feature-text">
+                Creates practical test scenarios directly
+                from the identified requirements.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)

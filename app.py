@@ -1,32 +1,175 @@
 import streamlit as st
 import time
+import json
 from google import genai
+from google.genai import types
 
-# --------------------------------------------------
+
+# ============================================================
 # PAGE CONFIG
-# --------------------------------------------------
+# ============================================================
 
 st.set_page_config(
-    page_title="FoundersPRD | AI Startup Requirements Agent",
+    page_title="FoundersPRD | Requirements Agent",
     page_icon="🚀",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --------------------------------------------------
-# TITLE
-# --------------------------------------------------
 
-st.title("🚀 FoundersPRD: Autonomous Startup Requirements Agent")
+# ============================================================
+# CUSTOM CSS
+# ============================================================
 
-st.caption(
-    "Convert raw startup ideas into Lean MVPs, MoSCoW Specs, and Agile User Stories."
-)
+st.markdown("""
+<style>
 
-# --------------------------------------------------
+    /* Main background */
+    .stApp {
+        background: #0e1117;
+    }
+
+    /* Main container */
+    .block-container {
+        max-width: 1200px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+
+    /* Hero */
+    .hero {
+        padding: 35px;
+        border-radius: 22px;
+        background: linear-gradient(
+            135deg,
+            #151b2b 0%,
+            #111827 100%
+        );
+        border: 1px solid #273449;
+        margin-bottom: 25px;
+    }
+
+    .hero-title {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+        color: #aab4c5;
+        font-size: 18px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 13px;
+        border-radius: 20px;
+        background: #1d4ed8;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    /* Section cards */
+    .info-card {
+        padding: 20px;
+        border-radius: 16px;
+        background: #151a24;
+        border: 1px solid #293241;
+        min-height: 120px;
+    }
+
+    .info-title {
+        font-size: 15px;
+        color: #9ca8bb;
+        margin-bottom: 8px;
+    }
+
+    .info-value {
+        font-size: 28px;
+        font-weight: 750;
+    }
+
+    /* Feature cards */
+    .feature-card {
+        padding: 22px;
+        border-radius: 16px;
+        background: #151a24;
+        border: 1px solid #293241;
+        height: 150px;
+    }
+
+    .feature-icon {
+        font-size: 28px;
+    }
+
+    .feature-title {
+        font-weight: 700;
+        font-size: 17px;
+        margin-top: 8px;
+    }
+
+    .feature-text {
+        color: #9ca8bb;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: #0b0f16;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        border-radius: 10px;
+        font-weight: 700;
+        min-height: 45px;
+    }
+
+    /* Text area */
+    textarea {
+        border-radius: 12px !important;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab"] {
+        font-weight: 650;
+    }
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# ============================================================
+# HERO
+# ============================================================
+
+st.markdown("""
+<div class="hero">
+
+    <div class="badge">⚡ AI REQUIREMENTS ENGINEERING</div>
+
+    <div class="hero-title">
+        🚀 FoundersPRD
+    </div>
+
+    <div class="hero-subtitle">
+        Transform raw ideas into structured software requirements,
+        user stories, priorities and test cases.
+    </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# ============================================================
 # SIDEBAR
-# --------------------------------------------------
+# ============================================================
 
 with st.sidebar:
+
     st.header("⚙️ Agent Settings")
 
     api_key = st.secrets.get("GEMINI_API_KEY", "")
@@ -37,171 +180,245 @@ with st.sidebar:
             type="password"
         )
     else:
-        st.success("API Key Loaded from Secrets")
+        st.success("✅ API Key Loaded")
 
     st.markdown("---")
 
-    st.subheader("💡 Demo Pitch Presets")
+    st.subheader("💡 Demo Ideas")
 
     preset = st.selectbox(
-        "Choose an example startup idea:",
+        "Choose an example:",
         [
             "Custom Idea",
-            "AI Cold Outreach Tool for Freelancers",
-            "Peer-to-Peer EV Charging Network",
+            "College Attendance Management",
+            "AI Cold Outreach Tool",
+            "Peer-to-Peer EV Charging",
             "Micro-SaaS Churn Predictor"
         ]
     )
 
-# --------------------------------------------------
-# SAMPLE PITCHES
-# --------------------------------------------------
+    st.markdown("---")
+
+    st.caption("G14 • AI Requirements Engineering Agent")
+    st.caption("Built for 24-Hour Hackathon 🚀")
+
+
+# ============================================================
+# PRESET DATA
+# ============================================================
 
 sample_pitches = {
-    "AI Cold Outreach Tool for Freelancers":
-        "We want an AI platform where freelance developers upload their portfolio "
-        "and it automatically finds startup founders on LinkedIn, writes "
-        "hyper-personalized pitch emails, tracks responses, and suggests meeting "
-        "times via Calendly.",
 
-    "Peer-to-Peer EV Charging Network":
-        "Airbnb for electric car chargers. Homeowners with home wall chargers "
-        "rent out their driveway plug to EV drivers who need an emergency charge. "
-        "Needs dynamic electricity rate pricing and automatic payouts.",
+    "College Attendance Management":
+        """
+        We want to build a college attendance management system where
+        teachers can mark attendance and students can view their attendance.
+        Students should receive alerts when their attendance is low.
+        """,
+
+    "AI Cold Outreach Tool":
+        """
+        We want an AI platform where freelance developers upload their
+        portfolio and the system helps create personalized outreach
+        messages for potential clients and tracks responses.
+        """,
+
+    "Peer-to-Peer EV Charging":
+        """
+        We want a platform where homeowners with EV chargers can allow
+        nearby electric vehicle drivers to book charging slots and make
+        payments securely.
+        """,
 
     "Micro-SaaS Churn Predictor":
-        "A lightweight widget for Shopify store owners that detects when a "
-        "customer is about to cancel a recurring order, offers a dynamic "
-        "discount or pause option, and provides an analytics dashboard on "
-        "churn reasons."
+        """
+        We want a lightweight system for online store owners that detects
+        customers who may stop using a subscription and provides analytics
+        about churn reasons.
+        """
 }
 
 default_input = sample_pitches.get(preset, "")
 
-# --------------------------------------------------
-# USER INPUT
-# --------------------------------------------------
+
+# ============================================================
+# INPUT SECTION
+# ============================================================
+
+st.subheader("💡 Describe Your Project")
 
 startup_pitch = st.text_area(
-    "Enter Startup Pitch, Problem Statement, or Raw Notes:",
+    "Project Idea / Problem Statement",
     value=default_input,
-    height=160,
+    height=180,
     placeholder=(
-        "Describe the problem, target audience, "
-        "and how the product solves it..."
+        "Example: We want to build a college attendance system "
+        "where teachers mark attendance and students receive alerts..."
     )
 )
 
-# --------------------------------------------------
-# GENERATE BUTTON
-# --------------------------------------------------
 
-col_run, _ = st.columns([1, 4])
+# ============================================================
+# INPUT INFO
+# ============================================================
 
-with col_run:
-    generate_btn = st.button(
-        "⚡ Generate PRD & Roadmap",
-        type="primary"
+word_count = len(startup_pitch.split())
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown(
+        f"""
+        <div class="info-card">
+            <div class="info-title">📝 Input Words</div>
+            <div class="info-value">{word_count}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-# --------------------------------------------------
+with col2:
+    st.markdown(
+        """
+        <div class="info-card">
+            <div class="info-title">🤖 AI Engine</div>
+            <div class="info-value">Gemini</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col3:
+    st.markdown(
+        """
+        <div class="info-card">
+            <div class="info-title">🎯 Analysis</div>
+            <div class="info-value">6 Modules</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+st.markdown("")
+
+
+# ============================================================
+# GENERATE BUTTON
+# ============================================================
+
+generate_btn = st.button(
+    "⚡ Generate Requirements",
+    type="primary",
+    use_container_width=True
+)
+
+
+# ============================================================
 # AI GENERATION
-# --------------------------------------------------
+# ============================================================
 
 if generate_btn:
 
-    # Check API key
     if not api_key:
-        st.error(
-            "Please provide your Gemini API key in the sidebar "
-            "or via Streamlit Secrets."
-        )
+        st.error("❌ Please provide your Gemini API key.")
 
-    # Check user input
     elif not startup_pitch.strip():
-        st.warning(
-            "Please enter a startup pitch or select a preset."
-        )
+        st.warning("⚠️ Please enter a project idea.")
 
     else:
 
-        # Create Gemini client
         client = genai.Client(api_key=api_key)
 
-        # --------------------------------------------------
-        # PROMPT
-        # --------------------------------------------------
+        # ----------------------------------------------------
+        # STRUCTURED PROMPT
+        # ----------------------------------------------------
 
         prompt = f"""
-You are an elite Chief Product Officer (CPO) and Agile Requirements
-Engineering Agent.
+You are an expert AI Requirements Engineering Agent.
 
-Analyze the following startup concept and produce a comprehensive,
-publication-grade Product Requirements Document (PRD).
+Analyze the following software project idea and convert it into
+structured software requirements.
 
-Startup Pitch:
-\"\"\"{startup_pitch}\"\"\"
+PROJECT IDEA:
+\"\"\"
+{startup_pitch}
+\"\"\"
 
-Structure your output strictly using these 4 Markdown sections:
+Return ONLY valid JSON.
 
-### 1. Target Persona & Value Proposition
+Use exactly this structure:
 
-- **Ideal Customer Profile (ICP)**:
-  Who will be the first 100 paying customers?
+{{
+    "functional_requirements": [
+        "Requirement 1",
+        "Requirement 2"
+    ],
 
-- **Core Pain Point**:
-  The exact friction or waste being addressed.
+    "non_functional_requirements": [
+        "Requirement 1",
+        "Requirement 2"
+    ],
 
-- **Unfair Advantage**:
-  Why this solution beats manual alternatives.
+    "user_stories": [
+        {{
+            "story": "As a [user], I want to [action], so that [benefit].",
+            "priority": "Must Have",
+            "acceptance_criteria": [
+                "Given ... When ... Then ..."
+            ]
+        }}
+    ],
 
-### 2. MVP Scope (MoSCoW Framework)
+    "priorities": [
+        {{
+            "feature": "Feature name",
+            "priority": "Must Have",
+            "reason": "Reason"
+        }}
+    ],
 
-- **Must Have (Day 1 Launch)**:
-  The bare essential features required to validate the hypothesis.
+    "ambiguities": [
+        {{
+            "issue": "Missing or ambiguous requirement",
+            "question": "Question that should be asked"
+        }}
+    ],
 
-- **Should Have (Next Sprint)**:
-  Key secondary features once user retention is validated.
+    "test_cases": [
+        {{
+            "id": "TC-01",
+            "scenario": "Test scenario",
+            "expected_result": "Expected result"
+        }}
+    ],
 
-- **Won't Have (Scope Creep Guardrail)**:
-  Features the team MUST NOT build right now to prevent scope creep.
+    "technical_dependencies": [
+        "Database",
+        "Authentication",
+        "API or service"
+    ]
+}}
 
-### 3. Engineering User Stories & BDD Scenarios
+Rules:
 
-Provide 2 high-priority Agile user stories.
-
-Format:
-
-**As a** [Persona],
-**I want to** [Action],
-**So that** [Outcome].
-
-Include executable Gherkin Acceptance Criteria
-(Given / When / Then) for both:
-
-1. Happy path
-2. Failure edge case
-
-### 4. Technical Feasibility & Blind Spot Audit
-
-- **Architecture Dependencies**:
-  Essential third-party APIs, authentication protocols,
-  databases, and external services.
-
-- **Critical Risk / Blind Spot**:
-  What single operational, security, technical, or economic
-  factor could break this product early?
-
-Keep the response structured, practical, and suitable for
-a software engineering team.
+1. Do not invent unnecessary features.
+2. Identify missing information.
+3. Keep requirements clear and testable.
+4. Separate functional and non-functional requirements.
+5. Prioritize important features.
+6. Generate realistic user stories.
+7. Generate practical test cases.
+8. Return ONLY JSON.
 """
 
-        # --------------------------------------------------
-        # GEMINI REQUEST WITH RETRY
-        # --------------------------------------------------
+
+        # ----------------------------------------------------
+        # GENERATE WITH RETRY
+        # ----------------------------------------------------
 
         with st.spinner(
-            "🤖 Analyzing market fit, scoping MVP, and generating technical specs..."
+            "🤖 AI is analyzing your requirements..."
         ):
 
             response = None
@@ -212,17 +429,18 @@ a software engineering team.
 
                     response = client.models.generate_content(
                         model="gemini-3.6-flash",
-                        contents=prompt
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json"
+                        )
                     )
 
-                    # Success
                     break
 
                 except Exception as e:
 
                     error_message = str(e)
 
-                    # Handle temporary 503 error
                     if "503" in error_message:
 
                         if attempt < 2:
@@ -230,7 +448,7 @@ a software engineering team.
                             wait_time = 2 ** attempt
 
                             st.warning(
-                                f"⚠️ Gemini is temporarily busy. "
+                                f"⚠️ Gemini is busy. "
                                 f"Retrying in {wait_time} seconds..."
                             )
 
@@ -239,12 +457,8 @@ a software engineering team.
                         else:
 
                             st.error(
-                                "❌ Gemini is currently unavailable "
-                                "after multiple attempts."
-                            )
-
-                            st.info(
-                                "Please try again after a short wait."
+                                "❌ Gemini is temporarily unavailable. "
+                                "Please try again."
                             )
 
                     else:
@@ -255,27 +469,322 @@ a software engineering team.
 
                         break
 
-            # --------------------------------------------------
-            # DISPLAY RESULT
-            # --------------------------------------------------
 
-            if response is not None:
+        # ====================================================
+        # PROCESS RESPONSE
+        # ====================================================
+
+        if response is not None:
+
+            try:
+
+                data = json.loads(response.text)
 
                 st.success(
-                    "✅ PRD Specification Generated Successfully!"
+                    "✅ Requirements Generated Successfully!"
                 )
 
                 st.markdown("---")
 
-                st.markdown(response.text)
+                # ------------------------------------------------
+                # METRICS
+                # ------------------------------------------------
 
-                # --------------------------------------------------
-                # DOWNLOAD
-                # --------------------------------------------------
+                functional = data.get(
+                    "functional_requirements", []
+                )
+
+                non_functional = data.get(
+                    "non_functional_requirements", []
+                )
+
+                stories = data.get(
+                    "user_stories", []
+                )
+
+                priorities = data.get(
+                    "priorities", []
+                )
+
+                ambiguities = data.get(
+                    "ambiguities", []
+                )
+
+                test_cases = data.get(
+                    "test_cases", []
+                )
+
+                m1, m2, m3, m4 = st.columns(4)
+
+                with m1:
+                    st.metric(
+                        "📋 Requirements",
+                        len(functional) + len(non_functional)
+                    )
+
+                with m2:
+                    st.metric(
+                        "👤 User Stories",
+                        len(stories)
+                    )
+
+                with m3:
+                    st.metric(
+                        "🧪 Test Cases",
+                        len(test_cases)
+                    )
+
+                with m4:
+                    st.metric(
+                        "⚠️ Ambiguities",
+                        len(ambiguities)
+                    )
+
+
+                st.markdown("")
+
+
+                # =================================================
+                # TABS
+                # =================================================
+
+                (
+                    tab_req,
+                    tab_story,
+                    tab_priority,
+                    tab_test,
+                    tab_risk,
+                    tab_tech
+                ) = st.tabs(
+                    [
+                        "📋 Requirements",
+                        "👤 User Stories",
+                        "🎯 Priority",
+                        "🧪 Test Cases",
+                        "⚠️ Ambiguities",
+                        "🏗️ Technical"
+                    ]
+                )
+
+
+                # =================================================
+                # REQUIREMENTS
+                # =================================================
+
+                with tab_req:
+
+                    st.subheader(
+                        "📋 Functional Requirements"
+                    )
+
+                    if functional:
+
+                        for i, req in enumerate(
+                            functional, 1
+                        ):
+                            st.markdown(
+                                f"**FR-{i:02d}**  {req}"
+                            )
+
+                    else:
+                        st.info(
+                            "No functional requirements detected."
+                        )
+
+
+                    st.markdown("---")
+
+                    st.subheader(
+                        "⚙️ Non-Functional Requirements"
+                    )
+
+                    if non_functional:
+
+                        for i, req in enumerate(
+                            non_functional, 1
+                        ):
+                            st.markdown(
+                                f"**NFR-{i:02d}**  {req}"
+                            )
+
+                    else:
+                        st.info(
+                            "No non-functional requirements detected."
+                        )
+
+
+                # =================================================
+                # USER STORIES
+                # =================================================
+
+                with tab_story:
+
+                    st.subheader(
+                        "👤 Agile User Stories"
+                    )
+
+                    for i, story in enumerate(
+                        stories, 1
+                    ):
+
+                        with st.expander(
+                            f"User Story {i}"
+                        ):
+
+                            st.markdown(
+                                f"**{story.get('story', '')}**"
+                            )
+
+                            st.markdown(
+                                f"**Priority:** "
+                                f"{story.get('priority', 'Not specified')}"
+                            )
+
+                            st.markdown(
+                                "**Acceptance Criteria**"
+                            )
+
+                            criteria = story.get(
+                                "acceptance_criteria", []
+                            )
+
+                            for criterion in criteria:
+
+                                st.markdown(
+                                    f"- {criterion}"
+                                )
+
+
+                # =================================================
+                # PRIORITY
+                # =================================================
+
+                with tab_priority:
+
+                    st.subheader(
+                        "🎯 Feature Prioritization"
+                    )
+
+                    for item in priorities:
+
+                        priority = item.get(
+                            "priority",
+                            "Not specified"
+                        )
+
+                        st.markdown(
+                            f"""
+                            **{item.get('feature', 'Feature')}**
+
+                            Priority: `{priority}`
+
+                            {item.get('reason', '')}
+                            """
+                        )
+
+                        st.markdown("---")
+
+
+                # =================================================
+                # TEST CASES
+                # =================================================
+
+                with tab_test:
+
+                    st.subheader(
+                        "🧪 Generated Test Cases"
+                    )
+
+                    for test in test_cases:
+
+                        st.markdown(
+                            f"### {test.get('id', 'TC')}"
+                        )
+
+                        st.write(
+                            f"**Scenario:** "
+                            f"{test.get('scenario', '')}"
+                        )
+
+                        st.write(
+                            f"**Expected Result:** "
+                            f"{test.get('expected_result', '')}"
+                        )
+
+                        st.markdown("---")
+
+
+                # =================================================
+                # AMBIGUITIES
+                # =================================================
+
+                with tab_risk:
+
+                    st.subheader(
+                        "⚠️ Missing / Ambiguous Requirements"
+                    )
+
+                    if ambiguities:
+
+                        for issue in ambiguities:
+
+                            st.warning(
+                                f"**Issue:** "
+                                f"{issue.get('issue', '')}"
+                            )
+
+                            st.info(
+                                f"**Question:** "
+                                f"{issue.get('question', '')}"
+                            )
+
+                    else:
+
+                        st.success(
+                            "No major ambiguities detected."
+                        )
+
+
+                # =================================================
+                # TECHNICAL DEPENDENCIES
+                # =================================================
+
+                with tab_tech:
+
+                    st.subheader(
+                        "🏗️ Technical Dependencies"
+                    )
+
+                    dependencies = data.get(
+                        "technical_dependencies", []
+                    )
+
+                    for dependency in dependencies:
+
+                        st.markdown(
+                            f"🔹 {dependency}"
+                        )
+
+
+                # =================================================
+                # DOWNLOAD JSON
+                # =================================================
+
+                st.markdown("---")
+
+                st.subheader(
+                    "📥 Export Requirements"
+                )
+
+                download_data = json.dumps(
+                    data,
+                    indent=4,
+                    ensure_ascii=False
+                )
 
                 st.download_button(
-                    label="📥 Download Specification (.md)",
-                    data=response.text,
-                    file_name="Startup_PRD_Specification.md",
-                    mime="text/markdown"
-                )
+                    label="📥 Download Requirements (JSON)",
+                    data=download_data,
+                    file_name="requirements.json",
+                    mime="application/json",
+                    use_container_width=True

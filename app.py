@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 import time
+import re
+
 from google import genai
 from google.genai import types
 
@@ -18,606 +20,395 @@ st.set_page_config(
 
 
 # ============================================================
-# LIQUID GLASS UI
+# LIQUID GLASS CSS
 # ============================================================
 
-st.markdown(
-    """
-    <style>
-
-    /* ======================================================
-       GLOBAL BACKGROUND
-       ====================================================== */
-
-    .stApp {
-        background:
-            radial-gradient(
-                circle at 10% 10%,
-                rgba(99, 102, 241, 0.20),
-                transparent 30%
-            ),
-            radial-gradient(
-                circle at 90% 15%,
-                rgba(56, 189, 248, 0.16),
-                transparent 28%
-            ),
-            radial-gradient(
-                circle at 50% 90%,
-                rgba(168, 85, 247, 0.14),
-                transparent 30%
-            ),
-            #070910;
-        color: #f5f7ff;
-    }
-
-
-    /* ======================================================
-       MAIN CONTAINER
-       ====================================================== */
-
-    .block-container {
-        max-width: 1250px;
-        padding-top: 2rem;
-        padding-bottom: 4rem;
-    }
-
-
-    /* ======================================================
-       SIDEBAR
-       ====================================================== */
-
-    section[data-testid="stSidebar"] {
-        background:
-            linear-gradient(
-                180deg,
-                rgba(16, 20, 34, 0.94),
-                rgba(8, 11, 20, 0.96)
-            );
-
-        border-right: 1px solid rgba(255,255,255,0.10);
-
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
-    }
-
-
-    section[data-testid="stSidebar"] * {
-        color: #eef2ff;
-    }
-
-
-    /* ======================================================
-       HERO GLASS
-       ====================================================== */
-
-    .liquid-hero {
-
-        position: relative;
-
-        padding: 42px;
-
-        border-radius: 30px;
-
-        background:
-            linear-gradient(
-                135deg,
-                rgba(255,255,255,0.12),
-                rgba(255,255,255,0.035)
-            );
-
-        border: 1px solid rgba(255,255,255,0.16);
-
-        box-shadow:
-            0 25px 80px rgba(0,0,0,0.35),
-            inset 0 1px 1px rgba(255,255,255,0.18);
-
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
-
-        overflow: hidden;
-
-        margin-bottom: 28px;
-    }
-
-
-    .liquid-hero::before {
-
-        content: "";
-
-        position: absolute;
-
-        width: 260px;
-        height: 260px;
-
-        right: -80px;
-        top: -100px;
-
-        background:
-            radial-gradient(
-                circle,
-                rgba(129,140,248,0.32),
-                transparent 70%
-            );
-
-        filter: blur(12px);
-    }
-
-
-    .liquid-hero::after {
-
-        content: "";
-
-        position: absolute;
-
-        width: 220px;
-        height: 220px;
-
-        left: -100px;
-        bottom: -120px;
-
-        background:
-            radial-gradient(
-                circle,
-                rgba(56,189,248,0.18),
-                transparent 70%
-            );
-
-        filter: blur(15px);
-    }
-
-
-    .hero-content {
-        position: relative;
-        z-index: 2;
-    }
-
-
-    .hero-badge {
-
-        display: inline-block;
-
-        padding: 7px 14px;
-
-        border-radius: 999px;
-
-        background:
-            rgba(129,140,248,0.13);
-
-        border:
-            1px solid rgba(165,180,252,0.28);
-
-        color: #c7d2fe;
-
-        font-size: 0.78rem;
-
-        font-weight: 750;
-
-        letter-spacing: 0.5px;
-
-        margin-bottom: 16px;
-    }
-
-
-    .hero-title {
-
-        font-size: 3.4rem;
-
-        line-height: 1.05;
-
-        font-weight: 850;
-
-        letter-spacing: -2.5px;
-
-        margin-bottom: 15px;
-
-        background:
-            linear-gradient(
-                100deg,
-                #ffffff,
-                #c7d2fe,
-                #bae6fd
-            );
-
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-
-    .hero-subtitle {
-
-        color: #aeb8cb;
-
-        font-size: 1.08rem;
-
-        line-height: 1.7;
-
-        max-width: 850px;
-    }
-
-
-    /* ======================================================
-       GLASS CARDS
-       ====================================================== */
-
-    .glass-card {
-
-        background:
-            linear-gradient(
-                145deg,
-                rgba(255,255,255,0.085),
-                rgba(255,255,255,0.025)
-            );
-
-        border:
-            1px solid rgba(255,255,255,0.12);
-
-        border-radius: 22px;
-
-        padding: 24px;
-
-        box-shadow:
-            0 18px 50px rgba(0,0,0,0.20),
-            inset 0 1px 1px rgba(255,255,255,0.08);
-
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-
-        transition:
-            transform 0.25s ease,
-            border-color 0.25s ease,
-            box-shadow 0.25s ease;
-    }
-
-
-    .glass-card:hover {
-
-        transform: translateY(-3px);
-
-        border-color:
-            rgba(165,180,252,0.28);
-
-        box-shadow:
-            0 22px 60px rgba(0,0,0,0.30),
-            0 0 30px rgba(99,102,241,0.08);
-    }
-
-
-    /* ======================================================
-       METRICS
-       ====================================================== */
-
-    div[data-testid="stMetric"] {
-
-        background:
-            linear-gradient(
-                145deg,
-                rgba(255,255,255,0.085),
-                rgba(255,255,255,0.025)
-            );
-
-        border:
-            1px solid rgba(255,255,255,0.11);
-
-        border-radius: 20px;
-
-        padding: 18px;
-
-        box-shadow:
-            inset 0 1px 1px rgba(255,255,255,0.07),
-            0 12px 35px rgba(0,0,0,0.18);
-
-        backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-    }
-
-
-    div[data-testid="stMetricLabel"] {
-        color: #9da8bb !important;
-    }
-
-
-    div[data-testid="stMetricValue"] {
-        font-weight: 800;
-        color: #f8fafc !important;
-    }
-
-
-    /* ======================================================
-       INPUT
-       ====================================================== */
-
-    div[data-baseweb="textarea"] {
-
-        background:
-            rgba(255,255,255,0.035);
-
-        border-radius: 18px;
-
-        border:
-            1px solid rgba(255,255,255,0.12);
-
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-
-
-    textarea {
-
-        color: #f8fafc !important;
-
-        font-size: 1rem !important;
-
-        line-height: 1.6 !important;
-    }
-
-
-    /* ======================================================
-       BUTTONS
-       ====================================================== */
-
-    .stButton > button {
-
-        border-radius: 15px;
-
-        min-height: 48px;
-
-        font-weight: 750;
-
-        background:
-            linear-gradient(
-                135deg,
-                rgba(255,255,255,0.10),
-                rgba(255,255,255,0.045)
-            );
-
-        border:
-            1px solid rgba(255,255,255,0.14);
-
-        color: #f8fafc;
-
-        box-shadow:
-            0 8px 25px rgba(0,0,0,0.18),
-            inset 0 1px 1px rgba(255,255,255,0.10);
-
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-
-        transition: all 0.22s ease;
-    }
-
-
-    .stButton > button:hover {
-
-        transform: translateY(-2px);
-
-        border-color:
-            rgba(165,180,252,0.40);
-
-        box-shadow:
-            0 12px 35px rgba(99,102,241,0.18);
-    }
-
-
-    /* Primary button */
-
-    button[kind="primary"] {
-
-        background:
-            linear-gradient(
-                135deg,
-                #6366f1,
-                #8b5cf6
-            ) !important;
-
-        border:
-            1px solid rgba(255,255,255,0.25) !important;
-
-        box-shadow:
-            0 10px 35px rgba(99,102,241,0.30),
-            inset 0 1px 1px rgba(255,255,255,0.25) !important;
-    }
-
-
-    /* ======================================================
-       TABS
-       ====================================================== */
-
-    button[data-baseweb="tab"] {
-
-        font-weight: 700;
-
-        color: #9ca8bc;
-    }
-
-
-    button[data-baseweb="tab"][aria-selected="true"] {
-
-        color: #ffffff !important;
-    }
-
-
-    div[data-baseweb="tab-highlight"] {
-
-        background:
-            linear-gradient(
-                90deg,
-                #6366f1,
-                #a855f7
-            );
-    }
-
-
-    /* ======================================================
-       EXPANDERS
-       ====================================================== */
-
-    details {
-
-        background:
-            rgba(255,255,255,0.035) !important;
-
-        border:
-            1px solid rgba(255,255,255,0.10) !important;
-
-        border-radius: 16px !important;
-
-        backdrop-filter: blur(20px);
-    }
-
-
-    /* ======================================================
-       ALERTS
-       ====================================================== */
-
-    div[data-testid="stAlert"] {
-
-        border-radius: 16px;
-
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-
-
-    /* ======================================================
-       PIPELINE
-       ====================================================== */
-
-    .pipeline-card {
-
-        text-align: center;
-
-        padding: 22px 12px;
-
-        border-radius: 18px;
-
-        background:
-            linear-gradient(
-                145deg,
-                rgba(255,255,255,0.075),
-                rgba(255,255,255,0.025)
-            );
-
-        border:
-            1px solid rgba(255,255,255,0.10);
-
-        box-shadow:
-            inset 0 1px 1px rgba(255,255,255,0.08);
-
-        backdrop-filter: blur(20px);
-
-        transition: 0.25s ease;
-    }
-
-
-    .pipeline-card:hover {
-
-        transform: translateY(-4px);
-
-        border-color:
-            rgba(129,140,248,0.35);
-    }
-
-
-    .pipeline-icon {
-
-        font-size: 1.7rem;
-
-        margin-bottom: 7px;
-    }
-
-
-    .pipeline-name {
-
-        color: #dce3ef;
-
-        font-size: 0.85rem;
-
-        font-weight: 700;
-    }
-
-
-    /* ======================================================
-       SECTION TITLES
-       ====================================================== */
-
-    .section-kicker {
-
-        color: #818cf8;
-
-        font-size: 0.78rem;
-
-        font-weight: 800;
-
-        letter-spacing: 1.5px;
-
-        text-transform: uppercase;
-
-        margin-bottom: 4px;
-    }
-
-
-    /* ======================================================
-       FEATURE CARDS
-       ====================================================== */
-
-    .feature-title {
-
-        font-size: 1.1rem;
-
-        font-weight: 750;
-
-        color: #f1f5f9;
-
-        margin-bottom: 8px;
-    }
-
-
-    .feature-text {
-
-        color: #9da8ba;
-
-        line-height: 1.55;
-
-        font-size: 0.92rem;
-    }
-
-
-    /* ======================================================
-       FOOTER
-       ====================================================== */
-
-    .footer {
-
-        text-align: center;
-
-        color: #667085;
-
-        font-size: 0.82rem;
-
-        padding-top: 35px;
-
-        line-height: 1.7;
-    }
-
-
-    /* ======================================================
-       DIVIDER
-       ====================================================== */
-
-    hr {
-
-        border-color:
-            rgba(255,255,255,0.08) !important;
-
-        margin-top: 28px !important;
-        margin-bottom: 28px !important;
-    }
-
-
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.stApp {
+    background:
+        radial-gradient(circle at 10% 10%, rgba(124, 92, 255, 0.18), transparent 30%),
+        radial-gradient(circle at 90% 15%, rgba(0, 180, 255, 0.14), transparent 28%),
+        radial-gradient(circle at 50% 90%, rgba(180, 70, 255, 0.12), transparent 35%),
+        #080b12;
+    color: white;
+}
+
+/* Main container */
+.block-container {
+    max-width: 1250px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(17, 21, 32, 0.94),
+            rgba(8, 11, 18, 0.98)
+        );
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+section[data-testid="stSidebar"] * {
+    color: #f5f7ff;
+}
+
+/* Glass cards */
+.glass {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.035)
+        );
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 24px;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* Hero */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 45px 42px;
+    margin-bottom: 28px;
+    border-radius: 30px;
+
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(75, 160, 255, 0.25),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 15% 80%,
+            rgba(150, 80, 255, 0.22),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.11),
+            rgba(255,255,255,0.035)
+        );
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+.hero:before {
+    content: "";
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    right: -100px;
+    top: -120px;
+    border-radius: 50%;
+    background: rgba(100,160,255,0.18);
+    filter: blur(40px);
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 999px;
+
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+
+    color: #b9c7ff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+
+    margin-bottom: 18px;
+}
+
+.hero-title {
+    font-size: 58px;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -2px;
+
+    background: linear-gradient(
+        90deg,
+        #ffffff,
+        #b9c5ff,
+        #9edcff
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    margin-bottom: 16px;
+}
+
+.hero-subtitle {
+    max-width: 800px;
+    color: #b8c0d4;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+/* Section titles */
+.section-label {
+    color: #9caeff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.section-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 22px;
+}
+
+/* Metrics */
+.metric-card {
+    padding: 18px;
+    min-height: 105px;
+
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(255,255,255,0.11);
+    border-radius: 18px;
+
+    backdrop-filter: blur(18px);
+}
+
+.metric-value {
+    font-size: 25px;
+    font-weight: 800;
+    color: white;
+}
+
+.metric-label {
+    color: #9ca6bb;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Pipeline */
+.pipeline-card {
+    min-height: 145px;
+    padding: 20px 12px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.035)
+        );
+
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 20px;
+
+    backdrop-filter: blur(18px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 15px 35px rgba(0,0,0,0.18);
+
+    transition: transform 0.25s ease;
+}
+
+.pipeline-card:hover {
+    transform: translateY(-5px);
+}
+
+.pipeline-icon {
+    font-size: 30px;
+    margin-bottom: 12px;
+}
+
+.pipeline-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+}
+
+.pipeline-subtitle {
+    color: #8f9ab0;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+/* Feature cards */
+.feature-card {
+    min-height: 210px;
+    padding: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.09),
+            rgba(255,255,255,0.035)
+        );
+
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+
+    backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 18px 50px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.feature-icon {
+    font-size: 27px;
+    margin-bottom: 12px;
+}
+
+.feature-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.feature-text {
+    color: #9da7ba;
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+/* Input area */
+textarea {
+    background: rgba(255,255,255,0.055) !important;
+    border: 1px solid rgba(255,255,255,0.13) !important;
+    border-radius: 18px !important;
+    color: white !important;
+}
+
+/* Buttons */
+.stButton > button {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.04)
+        );
+
+    color: white;
+    font-weight: 700;
+
+    min-height: 48px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    border-color: rgba(160,180,255,0.45);
+}
+
+/* Primary button */
+.stButton > button[kind="primary"] {
+    background:
+        linear-gradient(
+            135deg,
+            #7266ff,
+            #9a7cff
+        );
+
+    border: 1px solid rgba(255,255,255,0.25);
+
+    box-shadow:
+        0 12px 40px rgba(110,90,255,0.35);
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 6px;
+    background: rgba(255,255,255,0.035);
+    padding: 6px;
+    border-radius: 16px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: 12px;
+    color: #9ba5b9;
+}
+
+.stTabs [aria-selected="true"] {
+    background: rgba(255,255,255,0.10);
+    color: white;
+}
+
+/* Expanders */
+.streamlit-expanderHeader {
+    background: rgba(255,255,255,0.045) !important;
+    border-radius: 14px !important;
+}
+
+/* Footer */
+.footer {
+    margin-top: 50px;
+    padding: 25px;
+    text-align: center;
+
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.09);
+
+    border-radius: 20px;
+
+    color: #8792a8;
+    font-size: 13px;
+
+    backdrop-filter: blur(18px);
+}
+
+/* Hide Streamlit menu */
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    background: transparent !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
 # ============================================================
@@ -626,41 +417,54 @@ st.markdown(
 
 with st.sidebar:
 
-    st.markdown("## 🚀 ReqPilot")
+    st.markdown("""
+    <div style="
+        font-size:28px;
+        font-weight:800;
+        margin-bottom:4px;
+    ">
+        🚀 ReqPilot
+    </div>
 
-    st.caption(
-        "AI Requirements Engineering Agent"
-    )
+    <div style="
+        color:#8f9ab0;
+        font-size:13px;
+        margin-bottom:25px;
+    ">
+        AI Requirements Engineering Agent
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.divider()
+    st.markdown("### 🔐 AI Connection")
 
-    st.markdown("### ⚙️ Agent Control")
+    api_key = None
 
-    api_key = st.secrets.get(
-        "GEMINI_API_KEY",
-        ""
-    )
+    try:
+        if "GEMINI_API_KEY" in st.secrets:
+            api_key = st.secrets["GEMINI_API_KEY"]
 
-    if api_key:
+            st.success("✓ API Key Connected")
 
-        st.success(
-            "🟢 Gemini Connected"
-        )
+        else:
+            api_key = st.text_input(
+                "Gemini API Key",
+                type="password",
+                placeholder="Enter your API key"
+            )
 
-    else:
-
+    except Exception:
         api_key = st.text_input(
             "Gemini API Key",
             type="password",
-            placeholder="Paste API key..."
+            placeholder="Enter your API key"
         )
 
     st.divider()
 
-    st.markdown("### 💡 Demo Presets")
+    st.markdown("### 🎯 Demo Presets")
 
     preset = st.selectbox(
-        "Choose a project",
+        "Choose a sample project",
         [
             "Custom Idea",
             "College Attendance System",
@@ -674,113 +478,95 @@ with st.sidebar:
 
     st.markdown("### 🧠 AI Pipeline")
 
-    st.write("🔍 Requirement Extraction")
-    st.write("🏷️ Classification")
-    st.write("🎯 Prioritization")
-    st.write("⚠️ Gap Detection")
-    st.write("👤 User Stories")
-    st.write("🧪 Test Cases")
+    st.markdown("""
+    **01** → Requirement Extraction  
+    **02** → Requirement Classification  
+    **03** → Priority Analysis  
+    **04** → Ambiguity Detection  
+    **05** → User Story Generation  
+    **06** → Test Case Generation
+    """, unsafe_allow_html=True)
 
     st.divider()
 
-    st.caption(
-        "G14 • 24-Hour Hackathon"
-    )
-
-    st.caption(
-        "Python + Streamlit + Gemini"
-    )
+    st.caption("G14 • Hackathon Prototype")
 
 
 # ============================================================
 # HERO
 # ============================================================
 
-st.markdown(
-    """
-    <div class="liquid-hero">
-        <div class="hero-content">
+st.markdown("""
+<div class="hero">
 
-            <div class="hero-badge">
-                G14 • AI REQUIREMENTS ENGINEERING AGENT
-            </div>
-
-            <div class="hero-title">
-                🚀 ReqPilot
-            </div>
-
-            <div class="hero-subtitle">
-                Transform raw project ideas into structured software
-                requirements, Agile user stories, priorities,
-                ambiguity detection and development-ready test cases.
-            </div>
-
-        </div>
+    <div class="hero-badge">
+        G14 • AI REQUIREMENTS ENGINEERING AGENT
     </div>
-    """,
-    unsafe_allow_html=True
-)
 
+    <div class="hero-title">
+        🚀 ReqPilot
+    </div>
 
-# ============================================================
-# SAMPLE INPUTS
-# ============================================================
+    <div class="hero-subtitle">
+        Transform raw project ideas into structured software requirements,
+        Agile user stories, priorities, ambiguity detection and
+        development-ready test cases.
+    </div>
 
-sample_pitches = {
-
-    "College Attendance System":
-        "We want to build a college attendance management system "
-        "where teachers can mark attendance and students can view "
-        "their attendance. Students should receive alerts when "
-        "their attendance is low.",
-
-    "AI Cold Outreach Platform":
-        "We want an AI platform for freelance developers where users "
-        "can upload their portfolio, generate personalized outreach "
-        "messages, track responses and manage potential clients.",
-
-    "EV Charging Network":
-        "We want a platform where homeowners with EV chargers can "
-        "allow nearby electric vehicle drivers to book charging slots "
-        "and make payments securely.",
-
-    "Student Learning Platform":
-        "We want an AI-powered learning platform where students can "
-        "upload study material, ask questions, receive explanations "
-        "and track their learning progress."
-}
-
-default_input = sample_pitches.get(
-    preset,
-    ""
-)
+</div>
+""", unsafe_allow_html=True)
 
 
 # ============================================================
 # PROJECT INPUT
 # ============================================================
 
-st.markdown(
-    '<div class="section-kicker">INPUT</div>',
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class="section-label">
+    INPUT
+</div>
 
-st.header(
-    "💡 Describe Your Project"
-)
+<div class="section-title">
+    💡 Describe Your Project
+</div>
+""", unsafe_allow_html=True)
 
-st.caption(
-    "Start with a raw idea, problem statement or incomplete project notes."
-)
 
-startup_pitch = st.text_area(
+demo_texts = {
+
+    "College Attendance System":
+    """We want to build a college attendance management system where teachers
+    can mark attendance and students can view their attendance.
+    Students should receive alerts when their attendance is low.""",
+
+    "AI Cold Outreach Platform":
+    """We want to build an AI platform that helps sales teams generate
+    personalized cold emails from a company profile and target customer
+    information. The system should track responses and suggest follow-up messages.""",
+
+    "EV Charging Network":
+    """We want to build an EV charging platform where users can find nearby
+    charging stations, check availability, reserve a charger and make payments.
+    Station owners should be able to manage charging points.""",
+
+    "Student Learning Platform":
+    """We want to build an online learning platform for college students.
+    Students can watch lessons, complete quizzes and track their progress.
+    Teachers can upload courses and monitor student performance.""",
+
+    "Custom Idea":
+    ""
+}
+
+
+default_value = demo_texts[preset]
+
+
+project_idea = st.text_area(
     "Project Idea",
-    value=default_input,
-    height=175,
-    placeholder=(
-        "Example: We want to build an AI-powered "
-        "college attendance system..."
-    ),
+    value=default_value,
+    height=170,
+    placeholder="Example: Build a college attendance management system...",
     label_visibility="collapsed"
 )
 
@@ -789,125 +575,98 @@ startup_pitch = st.text_area(
 # METRICS
 # ============================================================
 
-word_count = len(
-    startup_pitch.split()
-)
+word_count = len(project_idea.split()) if project_idea.strip() else 0
 
-col1, col2, col3, col4 = st.columns(4)
+m1, m2, m3, m4 = st.columns(4)
 
-with col1:
+with m1:
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{word_count}</div>
+        <div class="metric-label">INPUT WORDS</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.metric(
-        "📝 Input Words",
-        word_count
-    )
+with m2:
+    st.markdown("""
+    <div class="metric-card">
+        <div class="metric-value">6</div>
+        <div class="metric-label">AI MODULES</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-with col2:
+with m3:
+    st.markdown("""
+    <div class="metric-card">
+        <div class="metric-value">6</div>
+        <div class="metric-label">OUTPUT ARTIFACTS</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.metric(
-        "🧠 AI Modules",
-        "6"
-    )
+with m4:
+    st.markdown("""
+    <div class="metric-card">
+        <div class="metric-value">Gemini</div>
+        <div class="metric-label">AI ENGINE</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-with col3:
 
-    st.metric(
-        "📦 Output Artifacts",
-        "6"
-    )
-
-with col4:
-
-    st.metric(
-        "⚡ AI Engine",
-        "Gemini"
-    )
+st.markdown("<br>", unsafe_allow_html=True)
 
 
 # ============================================================
 # PIPELINE
 # ============================================================
 
-st.divider()
+st.markdown("""
+<div class="section-label">
+    INTELLIGENCE PIPELINE
+</div>
 
-st.markdown(
-    '<div class="section-kicker">INTELLIGENCE PIPELINE</div>',
-    unsafe_allow_html=True
-)
+<div class="section-title">
+    🔄 From Raw Idea → Engineering Artifacts
+</div>
+""", unsafe_allow_html=True)
 
-st.header(
-    "🔄 From Raw Idea → Engineering Artifacts"
-)
 
 pipeline = [
-
-    ("💡", "Raw Idea"),
-
-    ("🔍", "Extract"),
-
-    ("🏷️", "Classify"),
-
-    ("🎯", "Prioritize"),
-
-    ("⚠️", "Detect Gaps"),
-
-    ("🧪", "Test Cases")
+    ("💡", "Raw Idea", "User Input"),
+    ("🧩", "Extract", "Requirements"),
+    ("🏷️", "Classify", "Functional / NFR"),
+    ("⚡", "Prioritize", "MoSCoW"),
+    ("🔎", "Detect Gaps", "Ambiguities"),
+    ("🧪", "Test Cases", "Validation")
 ]
 
 
-pipeline_cols = st.columns(6)
+cols = st.columns(6)
 
-for col, item in zip(
-    pipeline_cols,
-    pipeline
-):
+for col, item in zip(cols, pipeline):
 
-    icon, name = item
+    icon, title, subtitle = item
 
     with col:
+        st.markdown(f"""
+        <div class="pipeline-card">
 
-        st.markdown(
-            f"""
-            <div class="pipeline-card">
-
-                <div class="pipeline-icon">
-                    {icon}
-                </div>
-
-                <div class="pipeline-name">
-                    {name}
-                </div>
-
+            <div class="pipeline-icon">
+                {icon}
             </div>
-            """,
-            unsafe_allow_html=True
-        )
 
+            <div class="pipeline-title">
+                {title}
+            </div>
 
-# ============================================================
-# ACTIONS
-# ============================================================
+            <div class="pipeline-subtitle">
+                {subtitle}
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
 
 st.markdown("<br>", unsafe_allow_html=True)
-
-action1, action2 = st.columns(
-    [3, 1]
-)
-
-with action1:
-
-    generate_btn = st.button(
-        "⚡ Analyze Requirements",
-        type="primary",
-        use_container_width=True
-    )
-
-with action2:
-
-    demo_btn = st.button(
-        "🎬 Demo Mode",
-        use_container_width=True
-    )
 
 
 # ============================================================
@@ -917,153 +676,235 @@ with action2:
 demo_data = {
 
     "functional_requirements": [
-
-        "Teachers must be able to mark attendance for students.",
-
-        "Students must be able to view their attendance percentage.",
-
-        "The system must automatically calculate attendance.",
-
-        "Students must receive alerts when attendance falls below "
-        "the configured threshold."
+        "Teachers shall be able to mark attendance for students.",
+        "Students shall be able to view their attendance percentage.",
+        "The system shall automatically calculate attendance percentage.",
+        "The system shall notify students when their attendance falls below the configured threshold."
     ],
 
     "non_functional_requirements": [
-
-        "The system should provide secure role-based access.",
-
-        "Attendance records should be stored reliably.",
-
-        "The dashboard should provide acceptable response time."
+        "The system shall provide secure role-based access for teachers and students.",
+        "Attendance records shall be stored reliably.",
+        "The system should provide acceptable response time during normal usage."
     ],
 
     "user_stories": [
 
         {
-            "story":
-                "As a teacher, I want to mark attendance for my class "
-                "so that student attendance records remain up to date.",
-
-            "priority":
-                "Must Have",
-
+            "story": "As a teacher, I want to mark student attendance so that attendance records are maintained digitally.",
             "acceptance_criteria": [
-
-                "Given a teacher is logged in, when attendance is "
-                "submitted, then the attendance record should be saved.",
-
-                "Given attendance submission fails, when the teacher "
-                "retries, then the system should display an error."
+                "Given a teacher is logged in, when they open a class, then they should see the enrolled students.",
+                "Given the student list is displayed, when the teacher marks attendance, then the attendance should be saved."
             ]
         },
 
         {
-            "story":
-                "As a student, I want to view my attendance percentage "
-                "so that I can monitor my attendance status.",
-
-            "priority":
-                "Must Have",
-
+            "story": "As a student, I want to view my attendance percentage so that I can monitor my attendance.",
             "acceptance_criteria": [
-
-                "Given attendance records exist, when the student "
-                "opens the dashboard, then the current percentage "
-                "should be displayed.",
-
-                "Given attendance data is unavailable, when the dashboard "
-                "loads, then the system should display an appropriate message."
+                "Given a student is logged in, when they open attendance, then their current attendance percentage should be displayed.",
+                "Given attendance records exist, when the percentage is calculated, then it should reflect the stored attendance data."
             ]
         }
     ],
 
     "priorities": [
-
         {
-            "feature": "Teacher Attendance Entry",
+            "requirement": "Teacher attendance marking",
             "priority": "Must Have",
-            "reason": "Core functionality of the attendance system."
+            "reason": "Core functionality of the system."
         },
-
         {
-            "feature": "Student Attendance Dashboard",
+            "requirement": "Student attendance dashboard",
             "priority": "Must Have",
-            "reason": "Students need to monitor attendance."
+            "reason": "Required for students to monitor attendance."
         },
-
         {
-            "feature": "Low Attendance Alerts",
+            "requirement": "Low attendance alerts",
             "priority": "Should Have",
-            "reason": "Provides proactive notifications."
+            "reason": "Important for proactive student notification."
         }
     ],
 
     "ambiguities": [
-
-        {
-            "issue":
-                "The low attendance threshold is not specified.",
-
-            "question":
-                "Should the threshold be configurable by the institution?"
-        },
-
-        {
-            "issue":
-                "The notification channel is not specified.",
-
-            "question":
-                "Should alerts use email, SMS or in-app notifications?"
-        }
+        "What attendance percentage should trigger a low-attendance alert?",
+        "Should alerts be sent through email, SMS, push notification, or multiple channels?",
+        "Should teachers be able to edit attendance after submission?"
     ],
 
     "test_cases": [
 
         {
-            "id": "TC-01",
-
-            "scenario":
-                "Teacher submits attendance successfully.",
-
-            "expected_result":
-                "Attendance records are saved and reflected in "
-                "student dashboards."
+            "id": "TC-001",
+            "scenario": "Teacher marks a student present",
+            "expected": "Attendance record should be saved successfully."
         },
 
         {
-            "id": "TC-02",
-
-            "scenario":
-                "Student attendance falls below the threshold.",
-
-            "expected_result":
-                "The student receives a low-attendance notification."
+            "id": "TC-002",
+            "scenario": "Student opens attendance dashboard",
+            "expected": "Correct attendance percentage should be displayed."
         },
 
         {
-            "id": "TC-03",
-
-            "scenario":
-                "Unauthorized user attempts to modify attendance.",
-
-            "expected_result":
-                "The system denies the operation."
+            "id": "TC-003",
+            "scenario": "Student attendance falls below threshold",
+            "expected": "Low-attendance notification should be triggered."
         }
     ],
 
     "technical_dependencies": [
-
-        "Role-based authentication",
-
-        "Relational database",
-
+        "User authentication",
+        "Role-based authorization",
+        "Database for attendance records",
         "Notification service",
-
-        "REST API layer",
-
-        "Streamlit frontend"
+        "Web-based frontend"
     ]
 }
+
+
+# ============================================================
+# GEMINI PROMPT
+# ============================================================
+
+def create_prompt(idea):
+
+    return f"""
+You are an expert Software Requirements Engineer.
+
+Analyze the following raw project idea and convert it into structured
+software engineering artifacts.
+
+PROJECT IDEA:
+{idea}
+
+Return ONLY valid JSON.
+
+Use EXACTLY this structure:
+
+{{
+    "functional_requirements": [
+        "..."
+    ],
+
+    "non_functional_requirements": [
+        "..."
+    ],
+
+    "user_stories": [
+        {{
+            "story": "...",
+            "acceptance_criteria": [
+                "Given ..., when ..., then ..."
+            ]
+        }}
+    ],
+
+    "priorities": [
+        {{
+            "requirement": "...",
+            "priority": "Must Have / Should Have / Could Have / Won't Have",
+            "reason": "..."
+        }}
+    ],
+
+    "ambiguities": [
+        "..."
+    ],
+
+    "test_cases": [
+        {{
+            "id": "TC-001",
+            "scenario": "...",
+            "expected": "..."
+        }}
+    ],
+
+    "technical_dependencies": [
+        "..."
+    ]
+}}
+
+RULES:
+
+1. Extract clear functional requirements.
+2. Extract non-functional requirements.
+3. Generate useful Agile user stories.
+4. Every user story must contain Given/When/Then acceptance criteria.
+5. Assign realistic MoSCoW priorities.
+6. Identify missing or ambiguous requirements.
+7. Generate practical test cases.
+8. Identify technical dependencies.
+9. Do not invent unnecessary features.
+10. Keep the output concise and useful for developers.
+"""
+
+
+# ============================================================
+# GEMINI ANALYSIS FUNCTION
+# ============================================================
+
+def analyze_with_gemini(idea, api_key):
+
+    if not api_key:
+        raise ValueError("Gemini API key is missing.")
+
+    client = genai.Client(api_key=api_key)
+
+    prompt = create_prompt(idea)
+
+    last_error = None
+
+    for attempt in range(3):
+
+        try:
+
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+
+            text = response.text.strip()
+
+            # Remove accidental markdown fences
+            text = re.sub(
+                r"^```json\s*",
+                "",
+                text,
+                flags=re.IGNORECASE
+            )
+
+            text = re.sub(
+                r"^```\s*",
+                "",
+                text
+            )
+
+            text = re.sub(
+                r"\s*```$",
+                "",
+                text
+            )
+
+            return json.loads(text)
+
+        except Exception as e:
+
+            last_error = e
+
+            error_text = str(e)
+
+            if "503" in error_text or "UNAVAILABLE" in error_text:
+
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+
+            raise last_error
+
+    raise last_error
 
 
 # ============================================================
@@ -1072,703 +913,557 @@ demo_data = {
 
 def display_results(data):
 
-    functional = data.get(
-        "functional_requirements",
-        []
-    )
+    st.markdown("""
+    <div class="section-label">
+        AI OUTPUT
+    </div>
 
-    non_functional = data.get(
-        "non_functional_requirements",
-        []
-    )
-
-    stories = data.get(
-        "user_stories",
-        []
-    )
-
-    priorities = data.get(
-        "priorities",
-        []
-    )
-
-    ambiguities = data.get(
-        "ambiguities",
-        []
-    )
-
-    test_cases = data.get(
-        "test_cases",
-        []
-    )
-
-    dependencies = data.get(
-        "technical_dependencies",
-        []
-    )
+    <div class="section-title">
+        ✨ Engineering Analysis
+    </div>
+    """, unsafe_allow_html=True)
 
 
-    # ========================================================
-    # RESULTS HEADER
-    # ========================================================
-
-    st.divider()
-
-    st.markdown(
-        '<div class="section-kicker">AI OUTPUT</div>',
-        unsafe_allow_html=True
-    )
-
-    st.header(
-        "📊 Requirement Intelligence"
-    )
+    tabs = st.tabs([
+        "📋 Requirements",
+        "👤 User Stories",
+        "⚡ Priorities",
+        "🔎 Gaps",
+        "🧪 Test Cases",
+        "⚙️ Technical"
+    ])
 
 
-    # ========================================================
-    # RESULT METRICS
-    # ========================================================
-
-    r1, r2, r3, r4 = st.columns(4)
-
-    with r1:
-
-        st.metric(
-            "📋 Requirements",
-            len(functional) + len(non_functional)
-        )
-
-    with r2:
-
-        st.metric(
-            "👤 User Stories",
-            len(stories)
-        )
-
-    with r3:
-
-        st.metric(
-            "🧪 Test Cases",
-            len(test_cases)
-        )
-
-    with r4:
-
-        st.metric(
-            "⚠️ Gaps",
-            len(ambiguities)
-        )
-
-
-    # ========================================================
-    # TABS
-    # ========================================================
-
-    tabs = st.tabs(
-        [
-            "📋 Requirements",
-            "👤 User Stories",
-            "🎯 Priorities",
-            "⚠️ Gaps",
-            "🧪 Test Cases",
-            "🏗️ Technical"
-        ]
-    )
-
-
-    # ========================================================
+    # --------------------------------------------------------
     # REQUIREMENTS
-    # ========================================================
+    # --------------------------------------------------------
 
     with tabs[0]:
 
-        st.subheader(
-            "Functional Requirements"
+        st.markdown("### Functional Requirements")
+
+        functional = data.get(
+            "functional_requirements",
+            []
         )
 
-        for i, requirement in enumerate(
-            functional,
-            1
-        ):
+        if functional:
 
-            with st.container(border=True):
-
+            for i, req in enumerate(functional, 1):
                 st.markdown(
-                    f"**FR-{i:02d}**"
+                    f"**FR-{i:02d}** — {req}"
                 )
 
-                st.write(
-                    requirement
-                )
+        else:
+            st.info("No functional requirements generated.")
 
 
-        st.subheader(
-            "Non-Functional Requirements"
+        st.markdown("### Non-Functional Requirements")
+
+        nonfunctional = data.get(
+            "non_functional_requirements",
+            []
         )
 
-        for i, requirement in enumerate(
-            non_functional,
-            1
-        ):
+        if nonfunctional:
 
-            with st.container(border=True):
-
+            for i, req in enumerate(nonfunctional, 1):
                 st.markdown(
-                    f"**NFR-{i:02d}**"
+                    f"**NFR-{i:02d}** — {req}"
                 )
 
-                st.write(
-                    requirement
-                )
+        else:
+            st.info("No non-functional requirements generated.")
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # USER STORIES
-    # ========================================================
+    # --------------------------------------------------------
 
     with tabs[1]:
 
-        st.subheader(
-            "👤 Agile User Stories"
+        stories = data.get(
+            "user_stories",
+            []
         )
 
-        for i, story in enumerate(
-            stories,
-            1
-        ):
+        if not stories:
 
-            priority = story.get(
-                "priority",
-                "Not specified"
-            )
+            st.info("No user stories generated.")
+
+        for i, story in enumerate(stories, 1):
 
             with st.expander(
-                f"User Story {i} • {priority}",
+                f"User Story {i}",
                 expanded=True
             ):
 
-                st.write(
-                    story.get(
-                        "story",
-                        ""
-                    )
-                )
-
                 st.markdown(
-                    "#### ✅ Acceptance Criteria"
+                    f"**{story.get('story', '')}**"
                 )
 
-                for criterion in story.get(
+                st.markdown("**Acceptance Criteria**")
+
+                criteria = story.get(
                     "acceptance_criteria",
                     []
-                ):
+                )
 
-                    st.write(
-                        f"✓ {criterion}"
+                for criterion in criteria:
+
+                    st.markdown(
+                        f"• {criterion}"
                     )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # PRIORITIES
-    # ========================================================
+    # --------------------------------------------------------
 
     with tabs[2]:
 
-        st.subheader(
-            "🎯 Feature Prioritization"
+        priorities = data.get(
+            "priorities",
+            []
         )
+
+        if not priorities:
+
+            st.info("No priorities generated.")
 
         for item in priorities:
 
-            with st.container(border=True):
+            priority = item.get(
+                "priority",
+                "Unknown"
+            )
 
-                st.markdown(
-                    f"### {item.get('feature', 'Feature')}"
-                )
+            st.markdown(f"""
+            <div class="glass" style="
+                padding:18px;
+                margin-bottom:12px;
+            ">
 
-                st.write(
-                    f"**Priority:** "
-                    f"{item.get('priority', 'Not specified')}"
-                )
+                <div style="
+                    font-size:16px;
+                    font-weight:800;
+                    color:white;
+                ">
+                    {item.get("requirement", "")}
+                </div>
 
-                st.caption(
-                    item.get(
-                        "reason",
-                        ""
-                    )
-                )
+                <div style="
+                    margin-top:7px;
+                    color:#b8c4ff;
+                    font-weight:700;
+                ">
+                    ⚡ {priority}
+                </div>
+
+                <div style="
+                    margin-top:7px;
+                    color:#929db2;
+                    font-size:13px;
+                ">
+                    {item.get("reason", "")}
+                </div>
+
+            </div>
+            """, unsafe_allow_html=True)
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # GAPS
-    # ========================================================
+    # --------------------------------------------------------
 
     with tabs[3]:
 
-        st.subheader(
-            "⚠️ Missing & Ambiguous Requirements"
+        ambiguities = data.get(
+            "ambiguities",
+            []
         )
 
         if ambiguities:
 
-            for issue in ambiguities:
+            st.warning(
+                "These points need clarification before development:"
+            )
 
-                with st.container(border=True):
+            for i, item in enumerate(
+                ambiguities,
+                1
+            ):
 
-                    st.warning(
-                        issue.get(
-                            "issue",
-                            ""
-                        )
-                    )
-
-                    st.write(
-                        "💬 "
-                        + issue.get(
-                            "question",
-                            ""
-                        )
-                    )
+                st.markdown(
+                    f"**Q{i}.** {item}"
+                )
 
         else:
 
             st.success(
-                "✅ No major ambiguities detected."
+                "No major ambiguities detected."
             )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # TEST CASES
-    # ========================================================
+    # --------------------------------------------------------
 
     with tabs[4]:
 
-        st.subheader(
-            "🧪 Generated Test Cases"
+        tests = data.get(
+            "test_cases",
+            []
         )
 
-        for test in test_cases:
+        if tests:
 
-            with st.container(border=True):
+            for test in tests:
 
-                st.markdown(
-                    f"### {test.get('id', 'TC')}"
-                )
+                st.markdown(f"""
+                <div class="glass" style="
+                    padding:20px;
+                    margin-bottom:14px;
+                ">
 
-                st.write(
-                    f"**Scenario:** "
-                    f"{test.get('scenario', '')}"
-                )
+                    <div style="
+                        color:#aebaff;
+                        font-size:12px;
+                        font-weight:800;
+                        letter-spacing:1px;
+                    ">
+                        {test.get("id", "")}
+                    </div>
 
-                st.write(
-                    f"**Expected Result:** "
-                    f"{test.get('expected_result', '')}"
-                )
+                    <div style="
+                        font-size:17px;
+                        font-weight:800;
+                        margin-top:6px;
+                        color:white;
+                    ">
+                        {test.get("scenario", "")}
+                    </div>
+
+                    <div style="
+                        margin-top:10px;
+                        color:#9da7ba;
+                        font-size:14px;
+                    ">
+                        <b>Expected:</b>
+                        {test.get("expected", "")}
+                    </div>
+
+                </div>
+                """, unsafe_allow_html=True)
+
+        else:
+
+            st.info("No test cases generated.")
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # TECHNICAL
-    # ========================================================
+    # --------------------------------------------------------
 
     with tabs[5]:
 
-        st.subheader(
-            "🏗️ Technical Dependencies"
+        dependencies = data.get(
+            "technical_dependencies",
+            []
         )
 
-        for dependency in dependencies:
+        st.markdown("### Technical Dependencies")
 
-            st.write(
-                f"🔹 {dependency}"
+        if dependencies:
+
+            for dependency in dependencies:
+
+                st.markdown(
+                    f"🔹 {dependency}"
+                )
+
+        else:
+
+            st.info(
+                "No technical dependencies generated."
             )
 
 
-    # ========================================================
-    # EXPORT
-    # ========================================================
+    # --------------------------------------------------------
+    # JSON DOWNLOAD
+    # --------------------------------------------------------
 
-    st.divider()
-
-    st.subheader(
-        "📥 Export Requirements"
-    )
+    st.markdown("<br>", unsafe_allow_html=True)
 
     json_data = json.dumps(
         data,
-        indent=4,
+        indent=2,
         ensure_ascii=False
     )
 
     st.download_button(
-        "📥 Download Requirements JSON",
+        label="⬇️ Download Analysis JSON",
         data=json_data,
-        file_name="ReqPilot_Requirements.json",
-        mime="application/json",
+        file_name="reqpilot_analysis.json",
+        mime="application/json"
+    )
+
+
+# ============================================================
+# ACTION BUTTONS
+# ============================================================
+
+col1, col2 = st.columns([4, 1])
+
+with col1:
+
+    analyze_button = st.button(
+        "⚡ Analyze Requirements",
+        type="primary",
         use_container_width=True
     )
+
+with col2:
+
+    demo_button = st.button(
+        "🎬 Demo Mode",
+        use_container_width=True
+    )
+
+
+# ============================================================
+# ANALYZE
+# ============================================================
+
+if analyze_button:
+
+    if not project_idea.strip():
+
+        st.warning(
+            "Please describe your project idea first."
+        )
+
+    elif not api_key:
+
+        st.error(
+            "Gemini API key not found. Add GEMINI_API_KEY in Streamlit Secrets."
+        )
+
+    else:
+
+        with st.spinner(
+            "🧠 ReqPilot is analyzing your requirements..."
+        ):
+
+            try:
+
+                result = analyze_with_gemini(
+                    project_idea,
+                    api_key
+                )
+
+                st.success(
+                    "✅ Requirements analysis completed!"
+                )
+
+                display_results(result)
+
+            except Exception as e:
+
+                error_text = str(e)
+
+                if (
+                    "503" in error_text
+                    or "UNAVAILABLE" in error_text
+                ):
+
+                    st.error(
+                        "⚠️ Gemini is temporarily unavailable. "
+                        "Please try again in a moment or use Demo Mode."
+                    )
+
+                elif (
+                    "429" in error_text
+                    or "quota" in error_text.lower()
+                ):
+
+                    st.error(
+                        "⚠️ API quota/rate limit reached. "
+                        "Please try again later or use Demo Mode."
+                    )
+
+                else:
+
+                    st.error(
+                        f"Execution Error: {error_text}"
+                    )
 
 
 # ============================================================
 # DEMO MODE
 # ============================================================
 
-if demo_btn:
+if demo_button:
 
     st.success(
-        "🎬 Demo Mode activated — using prepared analysis."
+        "🎬 Demo Mode activated — no API call required."
     )
 
-    display_results(
-        demo_data
-    )
+    display_results(demo_data)
 
 
 # ============================================================
-# GEMINI AI
+# FEATURES
 # ============================================================
 
-elif generate_btn:
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-    if not api_key:
+st.markdown("""
+<div class="section-label">
+    WHY REQPILOT
+</div>
 
-        st.error(
-            "❌ Gemini API key is not configured."
-        )
+<div class="section-title">
+    ✨ Built for Requirements Engineering
+</div>
 
-    elif not startup_pitch.strip():
+<div style="
+    color:#9ca6bb;
+    margin-bottom:24px;
+">
+    One raw idea → multiple development-ready artifacts.
+</div>
+""", unsafe_allow_html=True)
 
-        st.warning(
-            "⚠️ Please enter a project idea first."
-        )
 
-    else:
+f1, f2, f3 = st.columns(3)
 
-        client = genai.Client(
-            api_key=api_key
-        )
 
+with f1:
 
-        prompt = f"""
-You are an expert AI Requirements Engineering Agent.
+    st.markdown("""
+    <div class="feature-card">
 
-Analyze the following software project idea:
+        <div class="feature-icon">
+            📋
+        </div>
 
-\"\"\"
-{startup_pitch}
-\"\"\"
+        <div class="feature-title">
+            Requirement Extraction
+        </div>
 
-Return ONLY valid JSON.
+        <div class="feature-text">
+            Converts informal project ideas into structured
+            functional and non-functional requirements.
+        </div>
 
-Use exactly this structure:
+    </div>
+    """, unsafe_allow_html=True)
 
-{{
-    "functional_requirements": [],
 
-    "non_functional_requirements": [],
+with f2:
 
-    "user_stories": [
-        {{
-            "story": "As a [user], I want to [action], so that [benefit].",
-            "priority": "Must Have",
-            "acceptance_criteria": [
-                "Given ... When ... Then ..."
-            ]
-        }}
-    ],
+    st.markdown("""
+    <div class="feature-card">
 
-    "priorities": [
-        {{
-            "feature": "Feature name",
-            "priority": "Must Have",
-            "reason": "Reason"
-        }}
-    ],
+        <div class="feature-icon">
+            ⚠️
+        </div>
 
-    "ambiguities": [
-        {{
-            "issue": "Missing or ambiguous requirement",
-            "question": "Clarification question"
-        }}
-    ],
+        <div class="feature-title">
+            Ambiguity Detection
+        </div>
 
-    "test_cases": [
-        {{
-            "id": "TC-01",
-            "scenario": "Test scenario",
-            "expected_result": "Expected result"
-        }}
-    ],
+        <div class="feature-text">
+            Identifies missing, unclear and incomplete
+            requirements that need clarification.
+        </div>
 
-    "technical_dependencies": []
-}}
+    </div>
+    """, unsafe_allow_html=True)
 
-Instructions:
 
-1. Extract functional requirements.
-2. Extract non-functional requirements.
-3. Generate realistic Agile user stories.
-4. Include Given / When / Then acceptance criteria.
-5. Prioritize features using Must Have, Should Have and Could Have.
-6. Detect missing and ambiguous requirements.
-7. Generate practical test cases.
-8. Identify technical dependencies.
-9. Keep requirements clear and testable.
-10. Do not invent unnecessary features.
-11. Return ONLY valid JSON.
-"""
+with f3:
 
+    st.markdown("""
+    <div class="feature-card">
 
-        response = None
+        <div class="feature-icon">
+            🧪
+        </div>
 
-        # ====================================================
-        # API REQUEST
-        # ====================================================
+        <div class="feature-title">
+            Test Generation
+        </div>
 
-        with st.spinner(
-            "🤖 ReqPilot is analyzing your project..."
-        ):
+        <div class="feature-text">
+            Converts requirements into practical test
+            scenarios for development and validation.
+        </div>
 
-            for attempt in range(3):
-
-                try:
-
-                    response = client.models.generate_content(
-
-                        model="gemini-3.6-flash",
-
-                        contents=prompt,
-
-                        config=types.GenerateContentConfig(
-                            response_mime_type="application/json"
-                        )
-                    )
-
-                    break
-
-
-                except Exception as e:
-
-                    error_message = str(e)
-
-
-                    # -------------------------------
-                    # 429 QUOTA
-                    # -------------------------------
-
-                    if "429" in error_message:
-
-                        st.error(
-                            "🚫 Gemini API quota exceeded."
-                        )
-
-                        st.info(
-                            "Use 🎬 Demo Mode for your hackathon "
-                            "presentation without making another API request."
-                        )
-
-                        break
-
-
-                    # -------------------------------
-                    # 503 SERVER BUSY
-                    # -------------------------------
-
-                    elif "503" in error_message:
-
-                        if attempt < 2:
-
-                            wait_time = 2 ** attempt
-
-                            st.warning(
-                                f"⚠️ Gemini is temporarily busy. "
-                                f"Retrying in {wait_time}s..."
-                            )
-
-                            time.sleep(
-                                wait_time
-                            )
-
-                        else:
-
-                            st.error(
-                                "❌ Gemini is temporarily unavailable."
-                            )
-
-                            st.info(
-                                "You can use 🎬 Demo Mode to "
-                                "show the complete product."
-                            )
-
-
-                    # -------------------------------
-                    # OTHER ERROR
-                    # -------------------------------
-
-                    else:
-
-                        st.error(
-                            f"❌ Execution Error: {e}"
-                        )
-
-                        break
-
-
-        # ====================================================
-        # PARSE AI RESPONSE
-        # ====================================================
-
-        if response is not None:
-
-            try:
-
-                result_text = response.text.strip()
-
-
-                # Remove accidental Markdown fences
-
-                if result_text.startswith("```"):
-
-                    result_text = (
-                        result_text
-                        .replace("```json", "")
-                        .replace("```", "")
-                        .strip()
-                    )
-
-
-                data = json.loads(
-                    result_text
-                )
-
-
-                st.success(
-                    "✅ Requirements Generated Successfully!"
-                )
-
-
-                display_results(
-                    data
-                )
-
-
-            except Exception as e:
-
-                st.error(
-                    "⚠️ The AI response could not be parsed."
-                )
-
-                st.code(
-                    response.text,
-                    language="text"
-                )
-
-                st.caption(
-                    f"Parser error: {e}"
-                )
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================================
-# LANDING FEATURES
+# TECHNICAL CONTRIBUTION
 # ============================================================
 
-if not generate_btn and not demo_btn:
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-    st.divider()
+st.markdown("""
+<div class="glass" style="padding:28px;">
 
-    st.markdown(
-        '<div class="section-kicker">WHY REQPILOT</div>',
-        unsafe_allow_html=True
-    )
+    <div style="
+        color:#aebaff;
+        font-size:12px;
+        font-weight:800;
+        letter-spacing:2px;
+    ">
+        TECHNICAL CONTRIBUTION
+    </div>
 
-    st.header(
-        "✨ Built for Requirements Engineering"
-    )
+    <div style="
+        font-size:23px;
+        font-weight:800;
+        margin-top:10px;
+        color:white;
+    ">
+        Not just a generic AI wrapper.
+    </div>
 
-    st.caption(
-        "One raw idea → multiple development-ready artifacts."
-    )
+    <div style="
+        color:#9da7ba;
+        line-height:1.7;
+        margin-top:10px;
+    ">
+        ReqPilot uses a structured multi-stage requirements analysis
+        pipeline covering requirement classification, ambiguity
+        detection, prioritization, user-story generation and
+        test-case generation from a single project description.
+    </div>
 
-    f1, f2, f3 = st.columns(3)
-
-
-    with f1:
-
-        st.markdown(
-            """
-            <div class="glass-card">
-
-                <div class="feature-title">
-                    📋 Requirement Extraction
-                </div>
-
-                <div class="feature-text">
-                    Converts informal project ideas into
-                    structured functional and non-functional
-                    requirements.
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    with f2:
-
-        st.markdown(
-            """
-            <div class="glass-card">
-
-                <div class="feature-title">
-                    ⚠️ Ambiguity Detection
-                </div>
-
-                <div class="feature-text">
-                    Identifies missing information and creates
-                    clarification questions before development begins.
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    with f3:
-
-        st.markdown(
-            """
-            <div class="glass-card">
-
-                <div class="feature-title">
-                    🧪 Test Generation
-                </div>
-
-                <div class="feature-text">
-                    Converts requirements into practical
-                    test scenarios and expected outcomes.
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+</div>
+""", unsafe_allow_html=True)
 
 
 # ============================================================
 # FOOTER
 # ============================================================
 
-st.markdown(
-    """
-    <div class="footer">
+st.markdown("""
+<div class="footer">
 
-        <strong>ReqPilot</strong> • G14 AI Requirements Engineering Agent<br>
+    <strong style="color:white;">
+        ReqPilot
+    </strong>
+    • G14 AI Requirements Engineering Agent
+    <br><br>
 
-        Built with Python • Streamlit • Generative AI<br>
+    Built with Python • Streamlit • Generative AI
+    <br><br>
 
-        🚀 From raw idea to development-ready requirements
+    🚀 From raw idea to development-ready requirements
 
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+</div>
+""", unsafe_allow_html=True)

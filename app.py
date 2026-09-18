@@ -26,7 +26,7 @@ if "logged_in" not in st.session_state:
 
 
 # =========================================================
-# GLASS UI CSS
+# GLASSMORPHISM UI
 # =========================================================
 
 st.markdown("""
@@ -139,16 +139,12 @@ hr {
     border-color: rgba(255,255,255,0.08);
 }
 
-code {
-    border-radius: 8px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 
 # =========================================================
-# REQPILOT LOGIN
+# LOGIN
 # =========================================================
 
 if not st.session_state.logged_in:
@@ -194,10 +190,7 @@ if not st.session_state.logged_in:
                 use_container_width=True
             ):
 
-                if (
-                    username == "reqpilot"
-                    and password == "reqpilot123"
-                ):
+                if username == "reqpilot" and password == "reqpilot123":
 
                     st.session_state.logged_in = True
 
@@ -238,9 +231,7 @@ with st.sidebar:
 
     st.divider()
 
-    # -----------------------------------------------------
-    # AI CONNECTION
-    # -----------------------------------------------------
+    # API KEY
 
     st.subheader("🔑 AI Connection")
 
@@ -264,9 +255,7 @@ with st.sidebar:
 
     st.divider()
 
-    # -----------------------------------------------------
-    # DEMO PRESET
-    # -----------------------------------------------------
+    # PRESET
 
     st.subheader("🎬 Demo Preset")
 
@@ -283,9 +272,7 @@ with st.sidebar:
 
     st.divider()
 
-    # -----------------------------------------------------
     # PIPELINE
-    # -----------------------------------------------------
 
     st.subheader("⚙️ Pipeline")
 
@@ -303,10 +290,6 @@ with st.sidebar:
     )
 
     st.divider()
-
-    # -----------------------------------------------------
-    # LOGOUT
-    # -----------------------------------------------------
 
     if st.button(
         "🚪 Logout",
@@ -378,7 +361,7 @@ with st.container(border=True):
 
 
 # =========================================================
-# INPUT SECTION
+# INPUT
 # =========================================================
 
 st.write("")
@@ -412,37 +395,21 @@ with st.container(border=True):
 # METRICS
 # =========================================================
 
-word_count = (
-    len(idea.split())
-    if idea.strip()
-    else 0
-)
+word_count = len(idea.split()) if idea.strip() else 0
 
 m1, m2, m3, m4 = st.columns(4)
 
 with m1:
-    st.metric(
-        "Input Words",
-        word_count
-    )
+    st.metric("Input Words", word_count)
 
 with m2:
-    st.metric(
-        "AI Modules",
-        "6"
-    )
+    st.metric("AI Modules", "6")
 
 with m3:
-    st.metric(
-        "Artifacts",
-        "6"
-    )
+    st.metric("Artifacts", "6")
 
 with m4:
-    st.metric(
-        "AI Engine",
-        "Gemini"
-    )
+    st.metric("AI Engine", "Gemini")
 
 
 # =========================================================
@@ -458,24 +425,16 @@ st.subheader(
 pipeline = [
 
     ("💡", "Raw Idea", "User Input"),
-
     ("🧩", "Extract", "Requirements"),
-
     ("🏷️", "Classify", "FR / NFR"),
-
     ("⚡", "Prioritize", "MoSCoW"),
-
     ("🔎", "Detect Gaps", "Ambiguities"),
-
     ("🧪", "Test Cases", "Validation")
 ]
 
 cols = st.columns(6)
 
-for col, item in zip(
-    cols,
-    pipeline
-):
+for col, item in zip(cols, pipeline):
 
     icon, title, subtitle = item
 
@@ -497,72 +456,96 @@ for col, item in zip(
 
 
 # =========================================================
-# DEMO DATA
+# PROPER QUICKCART DEMO DATA
 # =========================================================
 
 demo_data = {
 
     "functional_requirements": [
 
-        "Users should be able to create an account and securely log in.",
+        "Users should be able to register and securely log in.",
 
-        "Users should be able to browse groceries by category and search for products.",
+        "Users should be able to browse groceries by category.",
+
+        "Users should be able to search for grocery products.",
 
         "Users should be able to add products to a shopping cart and update quantities.",
 
-        "Users should be able to place orders and make online payments.",
+        "Users should be able to place grocery orders and make online payments.",
 
-        "Users should be able to view their order status and track delivery.",
-
-        "The system should send notifications for order confirmation and delivery updates."
+        "Users should be able to track the delivery status of their orders."
     ],
 
     "non_functional_requirements": [
 
-        "User payment and personal information must be securely protected.",
+        "User personal and payment information must be securely protected.",
 
         "The application should provide fast response times during normal usage.",
 
-        "The system should remain available during high-demand periods.",
+        "The platform should remain available during high-demand periods.",
 
-        "The application should support multiple users placing orders simultaneously."
+        "The system should support multiple users simultaneously."
     ],
 
     "user_stories": [
 
         {
             "story":
-                "As a customer, I want to search for groceries so that I can quickly find the products I need.",
+                "As a customer, I want to create an account and log in so that I can securely manage my grocery orders.",
 
             "acceptance_criteria": [
 
-                "Given the user is on the product page, when they enter a product name, then matching products should be displayed.",
+                "Given a new user provides valid details, when registration is submitted, then an account should be created.",
 
-                "Given no matching product exists, when the user searches, then a suitable message should be displayed."
+                "Given a registered user enters valid credentials, when they log in, then they should access their account."
             ]
         },
 
         {
             "story":
-                "As a customer, I want to place an online order so that I can receive groceries at my preferred address.",
+                "As a customer, I want to search and browse groceries so that I can quickly find products I need.",
 
             "acceptance_criteria": [
 
-                "Given the cart contains products, when the user confirms the order and payment succeeds, then the order should be created.",
+                "Given products exist, when the user searches by product name, then matching products should be displayed.",
 
-                "Given payment fails, when the user attempts to place the order, then the order should not be confirmed."
+                "Given products belong to categories, when the user selects a category, then relevant products should be displayed."
             ]
         },
 
         {
             "story":
-                "As a customer, I want to track my order so that I know its current delivery status.",
+                "As a customer, I want to add products to my cart and update quantities so that I can prepare my order.",
 
             "acceptance_criteria": [
 
-                "Given an order has been placed, when the user opens order tracking, then the current order status should be displayed.",
+                "Given a product is available, when the user selects Add to Cart, then the product should appear in the cart.",
 
-                "The user should receive updates when the delivery status changes."
+                "When the user changes quantity, then the cart total should update correctly."
+            ]
+        },
+
+        {
+            "story":
+                "As a customer, I want to place an order and pay online so that my groceries can be delivered.",
+
+            "acceptance_criteria": [
+
+                "Given the cart contains products, when payment succeeds, then the order should be created.",
+
+                "Given payment fails, when checkout is attempted, then the order should not be confirmed."
+            ]
+        },
+
+        {
+            "story":
+                "As a customer, I want to track my delivery so that I know the current status of my order.",
+
+            "acceptance_criteria": [
+
+                "Given an order exists, when the user opens order tracking, then the current status should be displayed.",
+
+                "When delivery status changes, the user should receive an update."
             ]
         }
     ],
@@ -570,45 +553,57 @@ demo_data = {
     "priorities": [
 
         {
-            "requirement": "User registration and login",
-            "priority": "Must Have",
+            "requirement":
+                "User registration and login",
+            "priority":
+                "Must Have",
             "reason":
-                "Users need secure accounts to manage orders and personal information."
+                "Required for secure account and order management."
         },
 
         {
-            "requirement": "Product search and browsing",
-            "priority": "Must Have",
+            "requirement":
+                "Product browsing and search",
+            "priority":
+                "Must Have",
             "reason":
-                "Customers need to find products before placing an order."
+                "Core functionality for discovering groceries."
         },
 
         {
-            "requirement": "Shopping cart",
-            "priority": "Must Have",
+            "requirement":
+                "Shopping cart",
+            "priority":
+                "Must Have",
             "reason":
-                "Customers need to select and manage products before checkout."
+                "Required before checkout and order placement."
         },
 
         {
-            "requirement": "Online payment",
-            "priority": "Must Have",
+            "requirement":
+                "Online payment",
+            "priority":
+                "Must Have",
             "reason":
-                "Payment is required to complete an online order."
+                "Required to complete online purchases."
         },
 
         {
-            "requirement": "Order tracking",
-            "priority": "Should Have",
+            "requirement":
+                "Order tracking",
+            "priority":
+                "Should Have",
             "reason":
-                "Tracking improves delivery visibility and customer experience."
+                "Provides visibility into delivery progress."
         },
 
         {
-            "requirement": "Personalized product recommendations",
-            "priority": "Could Have",
+            "requirement":
+                "Personalized recommendations",
+            "priority":
+                "Could Have",
             "reason":
-                "Recommendations can improve product discovery but are not required for the core ordering flow."
+                "Useful enhancement but not required for the core platform."
         }
     ],
 
@@ -616,15 +611,15 @@ demo_data = {
 
         "Which payment methods should be supported?",
 
-        "What delivery areas and geographical locations should be supported?",
+        "Which geographical areas should the delivery service cover?",
 
-        "What happens when a product becomes unavailable after the user adds it to the cart?",
+        "What should happen if a product becomes unavailable after being added to the cart?",
 
-        "Should users be able to cancel an order after payment?",
+        "Can customers cancel an order after payment?",
 
         "What is the expected delivery time?",
 
-        "Should notifications be sent through SMS, email, push notifications, or all three?"
+        "Should notifications use email, SMS, push notifications, or multiple channels?"
     ],
 
     "test_cases": [
@@ -632,41 +627,49 @@ demo_data = {
         {
             "id": "TC-01",
             "scenario":
-                "User searches for an available grocery product.",
+                "A new user registers with valid information.",
             "expected":
-                "Matching products should be displayed with product name, price, and availability."
+                "A user account should be created successfully."
         },
 
         {
             "id": "TC-02",
             "scenario":
-                "User adds products to the cart and changes the quantity.",
+                "A customer searches for an available grocery product.",
             "expected":
-                "Cart quantity and total price should update correctly."
+                "Matching products should be displayed."
         },
 
         {
             "id": "TC-03",
             "scenario":
-                "User completes checkout with a successful payment.",
+                "A customer adds a product and changes its quantity.",
             "expected":
-                "The order should be created and an order confirmation should be displayed."
+                "The cart quantity and total price should update correctly."
         },
 
         {
             "id": "TC-04",
             "scenario":
-                "Payment fails during checkout.",
+                "A customer completes checkout with successful payment.",
             "expected":
-                "The order should not be confirmed and the user should receive an appropriate error message."
+                "The order should be created and confirmation should be displayed."
         },
 
         {
             "id": "TC-05",
             "scenario":
-                "User opens tracking for an existing order.",
+                "A customer opens tracking for an existing order.",
             "expected":
                 "The current delivery status should be displayed."
+        },
+
+        {
+            "id": "TC-06",
+            "scenario":
+                "Payment fails during checkout.",
+            "expected":
+                "The order should not be confirmed."
         }
     ],
 
@@ -680,7 +683,7 @@ demo_data = {
 
         "Payment gateway API",
 
-        "Delivery and order tracking service",
+        "Delivery tracking service",
 
         "Notification service",
 
@@ -698,7 +701,7 @@ def create_prompt(idea):
     return f"""
 You are an AI Requirements Engineering Agent.
 
-Analyze the following software product idea:
+Analyze this software product idea:
 
 {idea}
 
@@ -733,17 +736,16 @@ Return ONLY valid JSON using exactly this structure:
 
 Rules:
 
-1. Extract clear functional requirements.
-2. Extract realistic non-functional requirements.
-3. Generate Agile-style user stories.
-4. Include Given/When/Then style acceptance criteria where useful.
-5. Prioritize requirements using MoSCoW:
-   Must Have, Should Have, Could Have, Won't Have.
+1. Extract functional requirements.
+2. Extract non-functional requirements.
+3. Generate Agile user stories.
+4. Generate useful acceptance criteria.
+5. Use MoSCoW prioritization.
 6. Identify missing or ambiguous requirements.
 7. Generate practical test cases.
-8. Identify realistic technical dependencies.
-9. Do not invent unnecessary features.
-10. Keep the output concise and suitable for a software development team.
+8. Identify technical dependencies.
+9. Keep everything concise.
+10. Do not invent unnecessary features.
 """
 
 
@@ -826,7 +828,7 @@ def display_summary(data):
         )
     )
 
-    user_stories = len(
+    stories = len(
         data.get(
             "user_stories",
             []
@@ -840,30 +842,35 @@ def display_summary(data):
         )
     )
 
-    ambiguities = len(
+    gaps = len(
         data.get(
             "ambiguities",
             []
         )
     )
 
-    test_cases = len(
+    tests = len(
         data.get(
             "test_cases",
             []
         )
     )
 
-    total_requirements = (
-        functional + non_functional
+    dependencies = len(
+        data.get(
+            "technical_dependencies",
+            []
+        )
     )
 
+    total = functional + non_functional
+
     st.subheader(
-        "📊 Requirement Summary"
+        "📊 Requirement Summary Dashboard"
     )
 
     st.caption(
-        "Automatically generated from the analyzed product idea."
+        "AI-generated overview of the requirement analysis."
     )
 
     c1, c2, c3, c4 = st.columns(4)
@@ -871,7 +878,7 @@ def display_summary(data):
     with c1:
         st.metric(
             "Total Requirements",
-            total_requirements
+            total
         )
 
     with c2:
@@ -889,7 +896,7 @@ def display_summary(data):
     with c4:
         st.metric(
             "User Stories",
-            user_stories
+            stories
         )
 
     c5, c6, c7, c8 = st.columns(4)
@@ -902,30 +909,25 @@ def display_summary(data):
 
     with c6:
         st.metric(
-            "Gaps Found",
-            ambiguities
+            "Gaps Detected",
+            gaps
         )
 
     with c7:
         st.metric(
             "Test Cases",
-            test_cases
+            tests
         )
 
     with c8:
         st.metric(
             "Dependencies",
-            len(
-                data.get(
-                    "technical_dependencies",
-                    []
-                )
-            )
+            dependencies
         )
 
 
 # =========================================================
-# REQUIREMENT TRACEABILITY MATRIX
+# TRACEABILITY MATRIX
 # =========================================================
 
 def display_traceability(data):
@@ -935,7 +937,7 @@ def display_traceability(data):
     )
 
     st.caption(
-        "Maps functional requirements to user stories and test cases."
+        "Requirement → User Story → Test Case"
     )
 
     requirements = data.get(
@@ -956,7 +958,7 @@ def display_traceability(data):
     if not requirements:
 
         st.info(
-            "No functional requirements available for traceability."
+            "No functional requirements available."
         )
 
         return
@@ -968,45 +970,49 @@ def display_traceability(data):
         1
     ):
 
-        # Map requirement to user story
+        # Match requirement to story
         if stories:
 
             story_index = (
                 (i - 1) % len(stories)
-            ) + 1
+            )
 
-            story_text = stories[
-                story_index - 1
-            ].get(
+            story = stories[
+                story_index
+            ]
+
+            story_id = (
+                f"US-{story_index + 1:02d}"
+            )
+
+            story_text = story.get(
                 "story",
                 ""
             )
 
-            story_id = f"US-{story_index:02d}"
-
         else:
 
-            story_text = "Not generated"
             story_id = "—"
+            story_text = "Not generated"
 
 
-        # Map requirement to test case
+        # Match requirement to test
         if tests:
 
             test_index = (
                 (i - 1) % len(tests)
-            ) + 1
-
-            test_id = tests[
-                test_index - 1
-            ].get(
-                "id",
-                f"TC-{test_index:02d}"
             )
 
-            test_scenario = tests[
-                test_index - 1
-            ].get(
+            test = tests[
+                test_index
+            ]
+
+            test_id = test.get(
+                "id",
+                f"TC-{test_index + 1:02d}"
+            )
+
+            test_scenario = test.get(
                 "scenario",
                 ""
             )
@@ -1028,9 +1034,6 @@ def display_traceability(data):
                 "User Story":
                     story_id,
 
-                "Story":
-                    story_text,
-
                 "Test Case":
                     test_id,
 
@@ -1046,8 +1049,8 @@ def display_traceability(data):
     )
 
     st.info(
-        "💡 Traceability helps verify that each functional "
-        "requirement is connected to a user story and validation test."
+        "💡 Traceability connects requirements with "
+        "development stories and validation tests."
     )
 
 
@@ -1059,9 +1062,7 @@ def display_results(data):
 
     st.write("")
 
-    # -----------------------------------------------------
-    # SUMMARY DASHBOARD
-    # -----------------------------------------------------
+    # SUMMARY
 
     display_summary(
         data
@@ -1069,9 +1070,7 @@ def display_results(data):
 
     st.divider()
 
-    # -----------------------------------------------------
     # TABS
-    # -----------------------------------------------------
 
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
         [
@@ -1240,25 +1239,23 @@ def display_results(data):
         if not ambiguities:
 
             st.success(
-                "No major ambiguities detected."
+                "✅ No major ambiguities detected."
             )
 
-        else:
+        for i, item in enumerate(
+            ambiguities,
+            1
+        ):
 
-            for i, item in enumerate(
-                ambiguities,
-                1
+            with st.container(
+                border=True
             ):
 
-                with st.container(
-                    border=True
-                ):
+                st.write(
+                    f"🔎 **Gap {i}**"
+                )
 
-                    st.write(
-                        f"🔎 **Gap {i}**"
-                    )
-
-                    st.write(item)
+                st.write(item)
 
 
     # =====================================================
@@ -1368,7 +1365,7 @@ with col2:
 
 
 # =========================================================
-# LIVE AI ANALYSIS
+# GEMINI ANALYZE
 # =========================================================
 
 if analyze:
@@ -1382,7 +1379,7 @@ if analyze:
     elif not api_key:
 
         st.error(
-            "❌ Gemini API key is required."
+            "❌ Gemini API key is required for AI analysis."
         )
 
     else:
@@ -1414,7 +1411,7 @@ if analyze:
 
 
 # =========================================================
-# DEMO MODE
+# PROPER DEMO MODE
 # =========================================================
 
 if demo:
@@ -1422,7 +1419,12 @@ if demo:
     if preset == "QuickCart Grocery Platform":
 
         st.success(
-            "🎬 QuickCart Demo Mode activated"
+            "🎬 Demo Mode activated — QuickCart Grocery Platform"
+        )
+
+        st.caption(
+            "This is a pre-generated demo dataset. "
+            "No Gemini API call is required."
         )
 
         display_results(
@@ -1432,9 +1434,9 @@ if demo:
     else:
 
         st.info(
-            "🎬 Demo Mode currently contains the "
-            "QuickCart sample. Select QuickCart Grocery "
-            "Platform from the Demo Preset."
+            "🎬 For the hackathon demo, select "
+            "**QuickCart Grocery Platform** from the "
+            "Demo Preset and click Demo Mode."
         )
 
 
@@ -1452,11 +1454,11 @@ with st.container(border=True):
 
     st.write(
         "Our solution is not just a generic API wrapper. "
-        "ReqPilot uses a structured multi-stage requirements "
-        "analysis pipeline covering requirement classification, "
-        "ambiguity detection, prioritization, user-story "
-        "generation, test-case generation and requirement "
-        "traceability from a single project description."
+        "ReqPilot contributes through a structured multi-stage "
+        "requirements analysis pipeline covering requirement "
+        "classification, ambiguity detection, prioritization, "
+        "user-story generation, test-case generation, and "
+        "requirement traceability from a single project description."
     )
 
 

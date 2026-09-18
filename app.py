@@ -1,1051 +1,1025 @@
 import streamlit as st
-import json
-import time
-from google import genai
-from google.genai import types
 
-
-# =========================================================
+# ============================================================
 # PAGE CONFIG
-# =========================================================
+# ============================================================
 
 st.set_page_config(
-    page_title="ReqPilot",
-    page_icon="🚀",
+    page_title="Liquid Glass AI",
+    page_icon="✦",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-
-# =========================================================
-# GLASS UI CSS
-# =========================================================
+# ============================================================
+# LIQUID GLASS CSS
+# ============================================================
 
 st.markdown("""
 <style>
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --glass-white: rgba(255, 255, 255, 0.14);
+    --glass-white-light: rgba(255, 255, 255, 0.20);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --text-primary: rgba(255,255,255,0.96);
+    --text-secondary: rgba(255,255,255,0.62);
+}
+
+/* ==========================================================
+   GLOBAL
+   ========================================================== */
+
+html, body, [class*="css"] {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 .stApp {
+    min-height: 100vh;
+
     background:
-        radial-gradient(circle at 10% 10%, rgba(90, 70, 180, 0.22), transparent 30%),
-        radial-gradient(circle at 90% 20%, rgba(0, 170, 255, 0.16), transparent 28%),
-        radial-gradient(circle at 50% 100%, rgba(150, 50, 200, 0.14), transparent 35%),
-        #080b14;
-    color: #f5f7ff;
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(90, 210, 255, 0.50),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 20%,
+            rgba(70, 140, 255, 0.42),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 50% 90%,
+            rgba(0, 190, 255, 0.30),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #03141e 0%,
+            #062a3d 45%,
+            #041b2b 100%
+        );
+
+    background-attachment: fixed;
+}
+
+/* ==========================================================
+   REMOVE STREAMLIT DEFAULTS
+   ========================================================== */
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    background: transparent !important;
 }
 
 .block-container {
-    max-width: 1250px;
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+    max-width: 1450px;
+    padding-top: 35px;
+    padding-bottom: 60px;
 }
 
+/* ==========================================================
+   LIQUID GLASS MAIN CONTAINER
+   ========================================================== */
 
-/* Glass containers */
+.liquid-glass {
 
-div[data-testid="stVerticalBlockBorderWrapper"] {
-    background: rgba(255, 255, 255, 0.055);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 22px;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    position: relative;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.19),
+            rgba(255,255,255,0.07)
+        );
+
+    border: 1px solid rgba(255,255,255,0.25);
+
+    border-radius: 32px;
+
+    backdrop-filter: blur(35px) saturate(160%);
+    -webkit-backdrop-filter: blur(35px) saturate(160%);
+
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    padding: 8px;
+
+        inset 0 1px 1px rgba(255,255,255,0.40),
+
+        inset 0 -1px 1px rgba(0,0,0,0.15),
+
+        inset 1px 0 rgba(255,255,255,0.15),
+
+        0 25px 70px rgba(0,0,0,0.28);
 }
 
+/* top glossy reflection */
 
-/* Headings */
+.liquid-glass::before {
 
-h1 {
-    font-size: 3.2rem !important;
-    font-weight: 800 !important;
-    letter-spacing: -2px;
+    content: "";
+
+    position: absolute;
+
+    left: 3%;
+    right: 3%;
+    top: 1px;
+
+    height: 35%;
+
+    border-radius: 32px 32px 50% 50%;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.20),
+            rgba(255,255,255,0)
+        );
+
+    pointer-events: none;
 }
 
-h2 {
-    font-weight: 750 !important;
+/* ==========================================================
+   HERO
+   ========================================================== */
+
+.hero {
+
+    position: relative;
+
+    padding: 42px;
+
+    margin-bottom: 25px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.20),
+            rgba(255,255,255,0.06)
+        );
+
+    border: 1px solid rgba(255,255,255,0.27);
+
+    border-radius: 34px;
+
+    backdrop-filter: blur(40px) saturate(170%);
+    -webkit-backdrop-filter: blur(40px) saturate(170%);
+
+    box-shadow:
+        inset 0 1px 2px rgba(255,255,255,0.45),
+        inset 0 -2px 5px rgba(0,0,0,0.10),
+        0 30px 80px rgba(0,0,0,0.30);
 }
 
-h3 {
-    font-weight: 700 !important;
+/* ==========================================================
+   HERO LIGHT
+   ========================================================== */
+
+.hero-light {
+
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    right: -80px;
+    top: -120px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(120,225,255,0.35),
+            transparent 70%
+        );
+
+    filter: blur(20px);
+
+    pointer-events: none;
 }
 
+/* ==========================================================
+   TYPOGRAPHY
+   ========================================================== */
 
-/* Normal text */
+.hero-title {
 
-p {
-    color: rgba(240, 243, 255, 0.78);
+    position: relative;
+
+    font-size: 44px;
+    font-weight: 700;
+
+    letter-spacing: -1.8px;
+
+    color: var(--text-primary);
+
+    margin-bottom: 8px;
+
+    text-shadow:
+        0 2px 20px rgba(0,0,0,0.20);
 }
 
+.hero-subtitle {
 
-/* Buttons */
+    position: relative;
+
+    font-size: 16px;
+
+    color: var(--text-secondary);
+
+    max-width: 700px;
+
+    line-height: 1.7;
+}
+
+.section-title {
+
+    font-size: 20px;
+
+    font-weight: 600;
+
+    color: rgba(255,255,255,0.94);
+
+    margin: 25px 0 14px 5px;
+
+    letter-spacing: -0.3px;
+}
+
+/* ==========================================================
+   GLASS CARDS
+   ========================================================== */
+
+.glass-card {
+
+    position: relative;
+
+    min-height: 145px;
+
+    padding: 25px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.18),
+            rgba(255,255,255,0.055)
+        );
+
+    border: 1px solid rgba(255,255,255,0.22);
+
+    border-radius: 25px;
+
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.30),
+        inset 0 -1px 1px rgba(0,0,0,0.12),
+        0 15px 40px rgba(0,0,0,0.20);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border 0.25s ease;
+}
+
+.glass-card:hover {
+
+    transform: translateY(-4px);
+
+    border: 1px solid rgba(255,255,255,0.36);
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.40),
+        0 22px 55px rgba(0,0,0,0.28);
+}
+
+/* card shine */
+
+.glass-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: -20%;
+    top: -80%;
+
+    width: 140%;
+    height: 150%;
+
+    background:
+        linear-gradient(
+            120deg,
+            transparent 35%,
+            rgba(255,255,255,0.08) 50%,
+            transparent 65%
+        );
+
+    transform: rotate(10deg);
+
+    pointer-events: none;
+}
+
+/* ==========================================================
+   ICON
+   ========================================================== */
+
+.glass-icon {
+
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    margin-bottom: 15px;
+
+    font-size: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.25),
+            rgba(255,255,255,0.08)
+        );
+
+    border: 1px solid rgba(255,255,255,0.25);
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,0.35),
+        0 8px 20px rgba(0,0,0,0.16);
+}
+
+.card-title {
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    color: rgba(255,255,255,0.95);
+
+    margin-bottom: 7px;
+}
+
+.card-text {
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+    color: rgba(255,255,255,0.58);
+}
+
+/* ==========================================================
+   INPUT GLASS
+   ========================================================== */
+
+.stTextInput > div > div,
+.stTextArea > div > div {
+
+    background:
+        rgba(255,255,255,0.075) !important;
+
+    border:
+        1px solid rgba(255,255,255,0.18) !important;
+
+    border-radius:
+        17px !important;
+
+    backdrop-filter:
+        blur(25px) saturate(150%) !important;
+
+    -webkit-backdrop-filter:
+        blur(25px) saturate(150%) !important;
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,0.12),
+        inset 0 -1px rgba(0,0,0,0.10) !important;
+}
+
+.stTextInput input,
+.stTextArea textarea {
+
+    color: white !important;
+
+    font-size: 14px !important;
+}
+
+.stTextInput input::placeholder,
+.stTextArea textarea::placeholder {
+
+    color:
+        rgba(255,255,255,0.40) !important;
+}
+
+/* ==========================================================
+   SELECTBOX
+   ========================================================== */
+
+.stSelectbox > div > div {
+
+    background:
+        rgba(255,255,255,0.075) !important;
+
+    border:
+        1px solid rgba(255,255,255,0.18) !important;
+
+    border-radius:
+        17px !important;
+}
+
+/* ==========================================================
+   BUTTON
+   ========================================================== */
 
 .stButton > button {
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.07);
+
+    width: 100%;
+
+    height: 48px;
+
+    border-radius: 17px;
+
+    border: 1px solid rgba(255,255,255,0.30);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.22),
+            rgba(255,255,255,0.09)
+        );
+
     color: white;
-    font-weight: 650;
-    min-height: 45px;
-    transition: all 0.2s ease;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    backdrop-filter:
+        blur(25px) saturate(170%);
+
+    -webkit-backdrop-filter:
+        blur(25px) saturate(170%);
+
+    box-shadow:
+
+        inset 0 1px 1px rgba(255,255,255,0.35),
+
+        0 10px 30px rgba(0,0,0,0.18);
+
+    transition:
+        all 0.25s ease;
 }
 
 .stButton > button:hover {
-    background: rgba(255,255,255,0.13);
-    border-color: rgba(255,255,255,0.25);
-    transform: translateY(-1px);
+
+    transform: translateY(-2px);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.30),
+            rgba(255,255,255,0.12)
+        );
+
+    border-color:
+        rgba(255,255,255,0.45);
+
+    box-shadow:
+
+        inset 0 1px 1px rgba(255,255,255,0.45),
+
+        0 15px 35px rgba(0,0,0,0.25);
 }
 
+/* ==========================================================
+   METRIC GLASS
+   ========================================================== */
 
-/* Primary button */
+[data-testid="stMetric"] {
 
-.stButton > button[kind="primary"] {
-    background: linear-gradient(
-        135deg,
-        rgba(116, 80, 255, 0.85),
-        rgba(0, 174, 255, 0.75)
-    );
-    border: 1px solid rgba(255,255,255,0.18);
+    padding: 22px;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.15),
+            rgba(255,255,255,0.055)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.20);
+
+    backdrop-filter:
+        blur(25px) saturate(160%);
+
+    -webkit-backdrop-filter:
+        blur(25px) saturate(160%);
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,0.25),
+        0 12px 35px rgba(0,0,0,0.18);
 }
 
+[data-testid="stMetricLabel"] {
 
-/* Text area */
-
-textarea {
-    background: rgba(255,255,255,0.055) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    border-radius: 16px !important;
-    color: white !important;
+    color:
+        rgba(255,255,255,0.55) !important;
 }
 
+[data-testid="stMetricValue"] {
 
-/* Select boxes */
-
-div[data-baseweb="select"] > div {
-    background: rgba(255,255,255,0.06);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.12);
+    color:
+        rgba(255,255,255,0.95) !important;
 }
 
+/* ==========================================================
+   STATUS PILL
+   ========================================================== */
 
-/* Metrics */
+.status {
 
-div[data-testid="stMetric"] {
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(255,255,255,0.09);
-    padding: 14px;
-    border-radius: 16px;
+    display: inline-block;
+
+    padding: 7px 13px;
+
+    border-radius: 50px;
+
+    background:
+        rgba(255,255,255,0.10);
+
+    border:
+        1px solid rgba(255,255,255,0.20);
+
+    color:
+        rgba(255,255,255,0.75);
+
+    font-size: 12px;
+
+    backdrop-filter:
+        blur(20px);
 }
 
-
-/* Tabs */
-
-button[data-baseweb="tab"] {
-    color: rgba(255,255,255,0.7);
-}
-
-button[data-baseweb="tab"][aria-selected="true"] {
-    color: white;
-}
-
-
-/* Sidebar */
-
-section[data-testid="stSidebar"] {
-    background: rgba(7, 9, 18, 0.82);
-    border-right: 1px solid rgba(255,255,255,0.08);
-}
-
-
-/* Divider */
+/* ==========================================================
+   DIVIDER
+   ========================================================== */
 
 hr {
-    border-color: rgba(255,255,255,0.08);
+
+    border: none !important;
+
+    height: 1px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.20),
+            transparent
+        ) !important;
 }
 
+/* ==========================================================
+   SCROLLBAR
+   ========================================================== */
 
-/* Code blocks */
+::-webkit-scrollbar {
+    width: 7px;
+}
 
-code {
-    border-radius: 8px;
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255,255,255,0.18);
+
+    border-radius: 20px;
+}
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (max-width: 768px) {
+
+    .block-container {
+        padding: 20px;
+    }
+
+    .hero-title {
+        font-size: 32px;
+    }
+
+    .hero {
+        padding: 28px;
+        border-radius: 27px;
+    }
+
+    .glass-card {
+        border-radius: 21px;
+    }
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# =========================================================
-# SIDEBAR
-# =========================================================
+# ============================================================
+# HERO
+# ============================================================
 
-with st.sidebar:
+st.markdown("""
+<div class="hero">
 
-    st.title("🚀 ReqPilot")
-    st.caption("AI Requirements Engineering Agent")
+    <div class="hero-light"></div>
 
-    st.divider()
+    <div class="hero-title">
+        ✦ Liquid Glass AI
+    </div>
 
-    st.subheader("🔑 AI Connection")
+    <div class="hero-subtitle">
+        Intelligent requirements analysis with a premium
+        translucent interface inspired by modern glass UI.
+    </div>
 
-    api_key = None
+</div>
+""", unsafe_allow_html=True)
 
-    try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-        st.success("API Key Loaded from Secrets")
-    except Exception:
-        api_key = st.text_input(
-            "Gemini API Key",
-            type="password",
-            placeholder="Enter API key"
-        )
 
-    st.divider()
+# ============================================================
+# INPUT AREA
+# ============================================================
 
-    st.subheader("🎬 Demo Preset")
+st.markdown(
+    '<div class="section-title">Project Requirements</div>',
+    unsafe_allow_html=True
+)
 
-    preset = st.selectbox(
-        "Choose a product idea",
+col1, col2 = st.columns(2)
+
+with col1:
+    project_name = st.text_input(
+        "Project Name",
+        placeholder="e.g. AI Requirements Engineering Agent"
+    )
+
+with col2:
+    project_type = st.selectbox(
+        "Project Type",
         [
-            "Custom Idea",
-            "QuickCart Grocery Platform",
-            "AI Fitness Platform",
-            "EV Charging Platform",
-            "Student Learning Platform"
+            "AI / Machine Learning",
+            "Web Application",
+            "Mobile Application",
+            "IoT System",
+            "Cyber Security",
+            "Other"
         ]
     )
 
-    st.divider()
+requirements = st.text_area(
+    "Requirements",
+    placeholder=(
+        "Paste your software requirements here...\n\n"
+        "Example:\n"
+        "The system should provide fast login.\n"
+        "Users can access the dashboard.\n"
+        "The system should store user information."
+    ),
+    height=180
+)
 
-    st.subheader("⚙️ Pipeline")
+st.markdown("<br>", unsafe_allow_html=True)
 
-    st.write("💡 Raw Idea")
-    st.write("🧩 Requirement Extraction")
-    st.write("🏷️ Classification")
-    st.write("⚡ Prioritization")
-    st.write("🔎 Gap Detection")
-    st.write("🧪 Test Generation")
+if st.button("✦  Analyze Requirements"):
 
-    st.divider()
+    if not requirements.strip():
 
-    st.caption("G14 • AI Requirements Engineering Agent")
+        st.warning("Please enter your requirements first.")
 
+    else:
 
-# =========================================================
-# DEMO INPUTS
-# =========================================================
-
-demo_inputs = {
-
-    "QuickCart Grocery Platform": """
-We want to build QuickCart, a grocery delivery platform.
-
-Users should be able to create accounts, browse and search for groceries,
-add products to a cart, make online payments, place orders, track deliveries,
-and receive order notifications.
-
-The platform should securely handle user information and payments, support
-multiple users, and provide a reliable shopping experience.
-""",
-
-    "AI Fitness Platform": """
-We want to build an AI fitness platform where users can create profiles,
-set fitness goals, follow personalized workout plans, track progress,
-and receive recommendations based on their activity.
-""",
-
-    "EV Charging Platform": """
-We want to build an EV charging platform where electric vehicle owners
-can find nearby charging stations, check availability, reserve a charging
-slot, make payments, and receive notifications when charging is complete.
-""",
-
-    "Student Learning Platform": """
-We want to build a student learning platform where students can access
-courses, watch lessons, complete quizzes, track their progress, and receive
-personalized learning recommendations.
-"""
-}
+        st.success("Requirements submitted successfully.")
 
 
-# =========================================================
-# HERO
-# =========================================================
+# ============================================================
+# ANALYSIS CARDS
+# ============================================================
 
-with st.container(border=True):
+st.markdown(
+    '<div class="section-title">AI Analysis</div>',
+    unsafe_allow_html=True
+)
 
-    st.caption("G14 • AI REQUIREMENTS ENGINEERING AGENT")
+c1, c2, c3, c4 = st.columns(4)
 
-    st.title("🚀 ReqPilot")
+with c1:
+    st.markdown("""
+    <div class="glass-card">
 
-    st.write(
-        "Turn an informal product idea into structured, development-ready "
-        "software requirements using AI."
-    )
+        <div class="glass-icon">◇</div>
 
-    st.write(
-        "Requirements • User Stories • Priorities • Gaps • Test Cases • Dependencies"
-    )
+        <div class="card-title">
+            Ambiguity
+        </div>
 
+        <div class="card-text">
+            Detect vague and unclear statements that
+            require precise definitions.
+        </div>
 
-# =========================================================
-# INPUT SECTION
-# =========================================================
-
-st.write("")
-
-if preset == "Custom Idea":
-
-    default_text = ""
-
-else:
-
-    default_text = demo_inputs[preset]
+    </div>
+    """, unsafe_allow_html=True)
 
 
-with st.container(border=True):
+with c2:
+    st.markdown("""
+    <div class="glass-card">
 
-    st.subheader("💡 Describe Your Product")
+        <div class="glass-icon">◈</div>
 
-    idea = st.text_area(
-        "Product / Startup Idea",
-        value=default_text,
-        height=190,
-        placeholder=(
-            "Example: We want to build an online grocery delivery "
-            "platform where users can..."
-        ),
-        label_visibility="collapsed"
-    )
+        <div class="card-title">
+            Contradictions
+        </div>
+
+        <div class="card-text">
+            Identify conflicting requirements and
+            incompatible system expectations.
+        </div>
+
+    </div>
+    """, unsafe_allow_html=True)
 
 
-# =========================================================
-# METRICS
-# =========================================================
+with c3:
+    st.markdown("""
+    <div class="glass-card">
 
-word_count = len(idea.split()) if idea.strip() else 0
+        <div class="glass-icon">◎</div>
+
+        <div class="card-title">
+            Duplicates
+        </div>
+
+        <div class="card-text">
+            Find duplicate and semantically overlapping
+            requirement statements.
+        </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+
+with c4:
+    st.markdown("""
+    <div class="glass-card">
+
+        <div class="glass-icon">⌘</div>
+
+        <div class="card-title">
+            Dependencies
+        </div>
+
+        <div class="card-text">
+            Discover relationships and dependencies
+            between individual requirements.
+        </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================
+# DASHBOARD
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Requirement Dashboard</div>',
+    unsafe_allow_html=True
+)
 
 m1, m2, m3, m4 = st.columns(4)
 
 with m1:
-    st.metric("Input Words", word_count)
+    st.metric(
+        "Requirements",
+        "24",
+        "+6"
+    )
 
 with m2:
-    st.metric("AI Modules", "6")
+    st.metric(
+        "Issues Found",
+        "08",
+        "-2"
+    )
 
 with m3:
-    st.metric("Artifacts", "6")
+    st.metric(
+        "Dependencies",
+        "12",
+        "+4"
+    )
 
 with m4:
-    st.metric("AI Engine", "Gemini")
-
-
-# =========================================================
-# PIPELINE
-# =========================================================
-
-st.write("")
-st.subheader("🔄 Requirement Intelligence Pipeline")
-
-pipeline = [
-    ("💡", "Raw Idea", "User Input"),
-    ("🧩", "Extract", "Requirements"),
-    ("🏷️", "Classify", "FR / NFR"),
-    ("⚡", "Prioritize", "MoSCoW"),
-    ("🔎", "Detect Gaps", "Ambiguities"),
-    ("🧪", "Test Cases", "Validation")
-]
-
-cols = st.columns(6)
-
-for col, item in zip(cols, pipeline):
-
-    icon, title, subtitle = item
-
-    with col:
-
-        with st.container(border=True):
-
-            st.markdown(f"### {icon}")
-
-            st.write(f"**{title}**")
-
-            st.caption(subtitle)
-
-
-# =========================================================
-# DEMO DATA
-# =========================================================
-
-demo_data = {
-
-    "functional_requirements": [
-
-        "Users should be able to create an account and securely log in.",
-
-        "Users should be able to browse groceries by category and search for products.",
-
-        "Users should be able to add products to a shopping cart and update quantities.",
-
-        "Users should be able to place orders and make online payments.",
-
-        "Users should be able to view their order status and track delivery.",
-
-        "The system should send notifications for order confirmation and delivery updates."
-    ],
-
-    "non_functional_requirements": [
-
-        "User payment and personal information must be securely protected.",
-
-        "The application should provide fast response times during normal usage.",
-
-        "The system should remain available during high-demand periods.",
-
-        "The application should support multiple users placing orders simultaneously."
-    ],
-
-    "user_stories": [
-
-        {
-            "story":
-                "As a customer, I want to search for groceries so that I can quickly find the products I need.",
-
-            "acceptance_criteria": [
-
-                "Given the user is on the product page, when they enter a product name, then matching products should be displayed.",
-
-                "Given no matching product exists, when the user searches, then a suitable message should be displayed."
-            ]
-        },
-
-        {
-            "story":
-                "As a customer, I want to place an online order so that I can receive groceries at my preferred address.",
-
-            "acceptance_criteria": [
-
-                "Given the cart contains products, when the user confirms the order and payment succeeds, then the order should be created.",
-
-                "Given payment fails, when the user attempts to place the order, then the order should not be confirmed."
-            ]
-        },
-
-        {
-            "story":
-                "As a customer, I want to track my order so that I know its current delivery status.",
-
-            "acceptance_criteria": [
-
-                "Given an order has been placed, when the user opens order tracking, then the current order status should be displayed.",
-
-                "The user should receive updates when the delivery status changes."
-            ]
-        }
-    ],
-
-    "priorities": [
-
-        {
-            "requirement": "User registration and login",
-            "priority": "Must Have",
-            "reason":
-                "Users need secure accounts to manage orders and personal information."
-        },
-
-        {
-            "requirement": "Product search and browsing",
-            "priority": "Must Have",
-            "reason":
-                "Customers need to find products before placing an order."
-        },
-
-        {
-            "requirement": "Shopping cart",
-            "priority": "Must Have",
-            "reason":
-                "Customers need to select and manage products before checkout."
-        },
-
-        {
-            "requirement": "Online payment",
-            "priority": "Must Have",
-            "reason":
-                "Payment is required to complete an online order."
-        },
-
-        {
-            "requirement": "Order tracking",
-            "priority": "Should Have",
-            "reason":
-                "Tracking improves delivery visibility and customer experience."
-        },
-
-        {
-            "requirement": "Personalized product recommendations",
-            "priority": "Could Have",
-            "reason":
-                "Recommendations can improve product discovery but are not required for the core ordering flow."
-        }
-    ],
-
-    "ambiguities": [
-
-        "Which payment methods should be supported?",
-
-        "What delivery areas and geographical locations should be supported?",
-
-        "What happens when a product becomes unavailable after the user adds it to the cart?",
-
-        "Should users be able to cancel an order after payment?",
-
-        "What is the expected delivery time?",
-
-        "Should notifications be sent through SMS, email, push notifications, or all three?"
-    ],
-
-    "test_cases": [
-
-        {
-            "id": "TC-01",
-            "scenario": "User searches for an available grocery product.",
-            "expected":
-                "Matching products should be displayed with product name, price, and availability."
-        },
-
-        {
-            "id": "TC-02",
-            "scenario":
-                "User adds products to the cart and changes the quantity.",
-            "expected":
-                "Cart quantity and total price should update correctly."
-        },
-
-        {
-            "id": "TC-03",
-            "scenario":
-                "User completes checkout with a successful payment.",
-            "expected":
-                "The order should be created and an order confirmation should be displayed."
-        },
-
-        {
-            "id": "TC-04",
-            "scenario":
-                "Payment fails during checkout.",
-            "expected":
-                "The order should not be confirmed and the user should receive an appropriate error message."
-        },
-
-        {
-            "id": "TC-05",
-            "scenario":
-                "User opens tracking for an existing order.",
-            "expected":
-                "The current delivery status should be displayed."
-        }
-    ],
-
-    "technical_dependencies": [
-
-        "User authentication and authorization",
-
-        "Product and inventory database",
-
-        "Shopping cart and order management backend",
-
-        "Payment gateway API",
-
-        "Delivery and order tracking service",
-
-        "Notification service",
-
-        "Web or mobile frontend"
-    ]
-}
-
-
-# =========================================================
-# GEMINI PROMPT
-# =========================================================
-
-def create_prompt(idea):
-
-    return f"""
-You are an AI Requirements Engineering Agent.
-
-Analyze the following software product idea:
-
-{idea}
-
-Return ONLY valid JSON using exactly this structure:
-
-{{
-    "functional_requirements": [],
-    "non_functional_requirements": [],
-    "user_stories": [
-        {{
-            "story": "",
-            "acceptance_criteria": []
-        }}
-    ],
-    "priorities": [
-        {{
-            "requirement": "",
-            "priority": "",
-            "reason": ""
-        }}
-    ],
-    "ambiguities": [],
-    "test_cases": [
-        {{
-            "id": "",
-            "scenario": "",
-            "expected": ""
-        }}
-    ],
-    "technical_dependencies": []
-}}
-
-Rules:
-
-1. Extract clear functional requirements.
-2. Extract realistic non-functional requirements.
-3. Generate Agile-style user stories.
-4. Include Given/When/Then style acceptance criteria where useful.
-5. Prioritize requirements using MoSCoW:
-   Must Have, Should Have, Could Have, Won't Have.
-6. Identify missing or ambiguous requirements.
-7. Generate practical test cases.
-8. Identify realistic technical dependencies.
-9. Do not invent unnecessary features.
-10. Keep the output concise and suitable for a software development team.
-"""
-
-
-# =========================================================
-# GEMINI ANALYSIS
-# =========================================================
-
-def analyze_with_gemini(idea, key):
-
-    client = genai.Client(api_key=key)
-
-    prompt = create_prompt(idea)
-
-    last_error = None
-
-    for attempt in range(3):
-
-        try:
-
-            response = client.models.generate_content(
-
-                model="gemini-3.6-flash",
-
-                contents=prompt,
-
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
-                )
-            )
-
-            return json.loads(response.text)
-
-        except Exception as e:
-
-            last_error = e
-
-            error_text = str(e)
-
-            if "503" in error_text or "UNAVAILABLE" in error_text:
-
-                if attempt < 2:
-                    time.sleep(2 ** attempt)
-                    continue
-
-            raise last_error
-
-    raise last_error
-
-
-# =========================================================
-# DISPLAY RESULTS
-# =========================================================
-
-def display_results(data):
-
-    st.write("")
-
-    st.subheader("📊 Generated Requirements")
-
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-        [
-            "📋 Requirements",
-            "👤 User Stories",
-            "⚡ Priorities",
-            "🔎 Gaps",
-            "🧪 Test Cases",
-            "🔧 Technical"
-        ]
+    st.metric(
+        "Clarity Score",
+        "87%",
+        "+9%"
     )
 
 
-    # -----------------------------------------------------
-    # REQUIREMENTS
-    # -----------------------------------------------------
-
-    with tab1:
-
-        st.markdown("### Functional Requirements")
-
-        for i, req in enumerate(
-            data.get("functional_requirements", []),
-            1
-        ):
-
-            with st.container(border=True):
-
-                st.write(f"**FR-{i:02d}**")
-
-                st.write(req)
-
-
-        st.markdown("### Non-Functional Requirements")
-
-        for i, req in enumerate(
-            data.get("non_functional_requirements", []),
-            1
-        ):
-
-            with st.container(border=True):
-
-                st.write(f"**NFR-{i:02d}**")
-
-                st.write(req)
-
-
-    # -----------------------------------------------------
-    # USER STORIES
-    # -----------------------------------------------------
-
-    with tab2:
-
-        stories = data.get("user_stories", [])
-
-        if not stories:
-
-            st.info("No user stories generated.")
-
-        for i, story in enumerate(stories, 1):
-
-            with st.container(border=True):
-
-                st.markdown(f"### 👤 User Story {i}")
-
-                st.write(story.get("story", ""))
-
-                criteria = story.get("acceptance_criteria", [])
-
-                if criteria:
-
-                    st.write("**Acceptance Criteria**")
-
-                    for criterion in criteria:
-
-                        st.write(f"• {criterion}")
-
-
-    # -----------------------------------------------------
-    # PRIORITIES
-    # -----------------------------------------------------
-
-    with tab3:
-
-        priorities = data.get("priorities", [])
-
-        for item in priorities:
-
-            with st.container(border=True):
-
-                st.write(
-                    f"**{item.get('requirement', 'Requirement')}**"
-                )
-
-                st.write(
-                    f"Priority: **{item.get('priority', 'N/A')}**"
-                )
-
-                st.caption(
-                    item.get('reason', '')
-                )
-
-
-    # -----------------------------------------------------
-    # GAPS
-    # -----------------------------------------------------
-
-    with tab4:
-
-        ambiguities = data.get("ambiguities", [])
-
-        if not ambiguities:
-
-            st.success("No major ambiguities detected.")
-
-        else:
-
-            for i, item in enumerate(ambiguities, 1):
-
-                with st.container(border=True):
-
-                    st.write(f"🔎 **Gap {i}**")
-
-                    st.write(item)
-
-
-    # -----------------------------------------------------
-    # TEST CASES
-    # -----------------------------------------------------
-
-    with tab5:
-
-        test_cases = data.get("test_cases", [])
-
-        for test in test_cases:
-
-            with st.container(border=True):
-
-                st.write(
-                    f"### 🧪 {test.get('id', 'Test Case')}"
-                )
-
-                st.write(
-                    f"**Scenario:** {test.get('scenario', '')}"
-                )
-
-                st.write(
-                    f"**Expected:** {test.get('expected', '')}"
-                )
-
-
-    # -----------------------------------------------------
-    # TECHNICAL
-    # -----------------------------------------------------
-
-    with tab6:
-
-        dependencies = data.get(
-            "technical_dependencies",
-            []
-        )
-
-        st.markdown("### 🔧 Technical Dependencies")
-
-        for dependency in dependencies:
-
-            st.write(f"• {dependency}")
-
-
-    # -----------------------------------------------------
-    # DOWNLOAD JSON
-    # -----------------------------------------------------
-
-    st.divider()
-
-    st.download_button(
-
-        label="⬇️ Download Requirements JSON",
-
-        data=json.dumps(
-            data,
-            indent=2,
-            ensure_ascii=False
-        ),
-
-        file_name="reqpilot_requirements.json",
-
-        mime="application/json"
-    )
-
-
-# =========================================================
-# ACTION BUTTONS
-# =========================================================
-
-st.write("")
-
-col1, col2 = st.columns(2)
-
-
-with col1:
-
-    analyze_button = st.button(
-        "⚡ Analyze Requirements",
-        type="primary",
-        use_container_width=True
-    )
-
-
-with col2:
-
-    demo_button = st.button(
-        "🎬 Demo Mode",
-        use_container_width=True
-    )
-
-
-# =========================================================
-# LIVE AI ANALYSIS
-# =========================================================
-
-if analyze_button:
-
-    if not idea.strip():
-
-        st.warning(
-            "Please enter a product or startup idea first."
-        )
-
-    elif not api_key:
-
-        st.error(
-            "Gemini API key not found. Add GEMINI_API_KEY in Streamlit Secrets."
-        )
-
-    else:
-
-        with st.spinner(
-            "🤖 ReqPilot is analyzing your requirements..."
-        ):
-
-            try:
-
-                result = analyze_with_gemini(
-                    idea,
-                    api_key
-                )
-
-                st.success(
-                    "✅ Requirements successfully generated!"
-                )
-
-                display_results(result)
-
-            except Exception as e:
-
-                error_text = str(e)
-
-                if "503" in error_text or "UNAVAILABLE" in error_text:
-
-                    st.error(
-                        "Gemini is temporarily unavailable. "
-                        "Please try again or use Demo Mode."
-                    )
-
-                elif (
-                    "429" in error_text
-                    or "quota" in error_text.lower()
-                ):
-
-                    st.error(
-                        "Gemini API quota/rate limit reached. "
-                        "Please try again later or use Demo Mode."
-                    )
-
-                else:
-
-                    st.error(
-                        f"Execution Error: {error_text}"
-                    )
-
-
-# =========================================================
-# DEMO MODE
-# =========================================================
-
-if demo_button:
-
-    st.success(
-        "🎬 Demo Mode activated — showing QuickCart example."
-    )
-
-    display_results(demo_data)
-
-
-# =========================================================
-# FEATURES
-# =========================================================
-
-st.write("")
-st.divider()
-
-st.subheader("✨ Core Capabilities")
-
-c1, c2, c3 = st.columns(3)
-
-
-with c1:
-
-    with st.container(border=True):
-
-        st.markdown("### 🧩 Requirement Extraction")
-
-        st.write(
-            "Converts an informal product idea into structured "
-            "functional and non-functional requirements."
-        )
-
-
-with c2:
-
-    with st.container(border=True):
-
-        st.markdown("### 🔎 Ambiguity Detection")
-
-        st.write(
-            "Identifies missing decisions and unclear requirements "
-            "before development begins."
-        )
-
-
-with c3:
-
-    with st.container(border=True):
-
-        st.markdown("### 🧪 Test Generation")
-
-        st.write(
-            "Creates practical test scenarios from the generated "
-            "requirements."
-        )
-
-
-# =========================================================
-# TECHNICAL CONTRIBUTION
-# =========================================================
-
-st.write("")
-
-with st.container(border=True):
-
-    st.subheader("🧠 Technical Contribution")
-
-    st.write(
-        "Our solution is not just a generic API wrapper. "
-        "ReqPilot uses a structured multi-stage requirements analysis "
-        "pipeline covering requirement classification, ambiguity detection, "
-        "prioritization, user-story generation and test-case generation "
-        "from a single project description."
-    )
-
-
-# =========================================================
-# FOOTER
-# =========================================================
-
-st.write("")
-
-st.caption(
-    "ReqPilot • AI Requirements Engineering Agent • G14"
+# ============================================================
+# RESULTS
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Analysis Results</div>',
+    unsafe_allow_html=True
 )
+
+left, right = st.columns([1.5, 1])
+
+
+with left:
+
+    st.markdown("""
+    <div class="liquid-glass" style="padding:28px;">
+
+        <div class="card-title">
+            Requirement Findings
+        </div>
+
+        <br>
+
+        <div class="glass-card">
+
+            <span class="status">
+                AMBIGUITY DETECTED
+            </span>
+
+            <br><br>
+
+            <div class="card-title">
+                Requirement #04
+            </div>
+
+            <div class="card-text">
+
+                <b>Original:</b><br>
+                "The system should provide fast authentication."
+
+                <br><br>
+
+                <b>Issue:</b><br>
+                The term "fast" does not define a measurable
+                performance requirement.
+
+                <br><br>
+
+                <b>Suggested:</b><br>
+                Authentication should complete within
+                2 seconds under normal system load.
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="glass-card">
+
+            <span class="status">
+                DEPENDENCY
+            </span>
+
+            <br><br>
+
+            <div class="card-title">
+                Requirement #11
+            </div>
+
+            <div class="card-text">
+
+                A dependency was identified between
+                Requirement #07 and Requirement #11.
+
+                <br><br>
+
+                Authentication
+                <b>→</b>
+                User Dashboard
+
+            </div>
+
+        </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+
+with right:
+
+    st.markdown("""
+    <div class="liquid-glass" style="padding:28px;">
+
+        <div class="card-title">
+            ✦ AI Insights
+        </div>
+
+        <br>
+
+        <div class="glass-card">
+
+            <div class="glass-icon">
+                ✦
+            </div>
+
+            <div class="card-title">
+                Recommendation
+            </div>
+
+            <div class="card-text">
+                Add measurable acceptance criteria
+                to improve requirement testability.
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="glass-card">
+
+            <div class="glass-icon">
+                ◇
+            </div>
+
+            <div class="card-title">
+                Traceability
+            </div>
+
+            <div class="card-text">
+                Every detected issue remains connected
+                to its original requirement.
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="glass-card">
+
+            <div class="glass-icon">
+                ✓
+            </div>
+
+            <div class="card-title">
+                Quality
+            </div>
+
+            <div class="card-text">
+                Requirements are evaluated for clarity,
+                consistency and completeness.
+            </div>
+
+        </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.markdown("""
+<br><br>
+
+<div style="
+    text-align:center;
+    color:rgba(255,255,255,0.35);
+    font-size:12px;
+    padding:20px;
+">
+    Liquid Glass Interface • Streamlit
+</div>
+""", unsafe_allow_html=True)

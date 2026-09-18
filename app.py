@@ -92,7 +92,7 @@ Provide 2 high-priority Agile user stories:
         with st.spinner("Analyzing market fit, scoping MVP, and generating technical specs..."):
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.6-flash",
                     contents=prompt
                 )
                 

@@ -1,7 +1,6 @@
 import streamlit as st
 import json
 import time
-
 from google import genai
 from google.genai import types
 
@@ -19,124 +18,161 @@ st.set_page_config(
 
 
 # =========================================================
-# CSS - LIQUID GLASS LOOK
+# GLASS UI CSS
 # =========================================================
 
-st.markdown(
-    """
-    <style>
+st.markdown("""
+<style>
 
-    .stApp {
-        background:
-            radial-gradient(
-                circle at 10% 10%,
-                rgba(100, 80, 255, 0.18),
-                transparent 30%
-            ),
-            radial-gradient(
-                circle at 90% 10%,
-                rgba(0, 170, 255, 0.15),
-                transparent 30%
-            ),
-            radial-gradient(
-                circle at 50% 100%,
-                rgba(170, 70, 255, 0.12),
-                transparent 35%
-            ),
-            #080b12;
-    }
+.stApp {
+    background:
+        radial-gradient(circle at 10% 10%, rgba(90, 70, 180, 0.22), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(0, 170, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 50% 100%, rgba(150, 50, 200, 0.14), transparent 35%),
+        #080b14;
+    color: #f5f7ff;
+}
 
-    .block-container {
-        max-width: 1250px;
-        padding-top: 2rem;
-        padding-bottom: 4rem;
-    }
+.block-container {
+    max-width: 1250px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
 
-    /* Glass containers */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, 0.055);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 22px;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.07);
-    }
 
-    /* Text */
-    h1, h2, h3 {
-        color: white !important;
-    }
+/* Glass containers */
 
-    p, li {
-        color: #c1c8d8;
-    }
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    padding: 8px;
+}
 
-    /* Buttons */
-    .stButton > button {
-        border-radius: 15px;
-        min-height: 48px;
-        font-weight: 700;
-        border: 1px solid rgba(255,255,255,0.15);
-        background: rgba(255,255,255,0.07);
-        color: white;
-        transition: 0.2s;
-    }
 
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        border-color: rgba(150,160,255,0.5);
-    }
+/* Headings */
 
-    /* Primary button */
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(
-            135deg,
-            #7165ff,
-            #9879ff
-        );
-        color: white;
-        border: none;
-        box-shadow: 0 10px 35px rgba(110, 90, 255, 0.35);
-    }
+h1 {
+    font-size: 3.2rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -2px;
+}
 
-    /* Text area */
-    textarea {
-        background: rgba(255,255,255,0.055) !important;
-        color: white !important;
-        border-radius: 16px !important;
-        border: 1px solid rgba(255,255,255,0.13) !important;
-    }
+h2 {
+    font-weight: 750 !important;
+}
 
-    /* Tabs */
-    button[data-baseweb="tab"] {
-        color: #aeb7c9 !important;
-    }
+h3 {
+    font-weight: 700 !important;
+}
 
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: white !important;
-    }
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: rgba(8, 11, 18, 0.96);
-        border-right: 1px solid rgba(255,255,255,0.08);
-    }
+/* Normal text */
 
-    /* Hide Streamlit footer */
-    footer {
-        visibility: hidden;
-    }
+p {
+    color: rgba(240, 243, 255, 0.78);
+}
 
-    #MainMenu {
-        visibility: hidden;
-    }
 
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+/* Buttons */
+
+.stButton > button {
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.07);
+    color: white;
+    font-weight: 650;
+    min-height: 45px;
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover {
+    background: rgba(255,255,255,0.13);
+    border-color: rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+}
+
+
+/* Primary button */
+
+.stButton > button[kind="primary"] {
+    background: linear-gradient(
+        135deg,
+        rgba(116, 80, 255, 0.85),
+        rgba(0, 174, 255, 0.75)
+    );
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+
+/* Text area */
+
+textarea {
+    background: rgba(255,255,255,0.055) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 16px !important;
+    color: white !important;
+}
+
+
+/* Select boxes */
+
+div[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+
+/* Metrics */
+
+div[data-testid="stMetric"] {
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.09);
+    padding: 14px;
+    border-radius: 16px;
+}
+
+
+/* Tabs */
+
+button[data-baseweb="tab"] {
+    color: rgba(255,255,255,0.7);
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: white;
+}
+
+
+/* Sidebar */
+
+section[data-testid="stSidebar"] {
+    background: rgba(7, 9, 18, 0.82);
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+
+/* Divider */
+
+hr {
+    border-color: rgba(255,255,255,0.08);
+}
+
+
+/* Code blocks */
+
+code {
+    border-radius: 8px;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
 # =========================================================
@@ -146,59 +182,90 @@ st.markdown(
 with st.sidebar:
 
     st.title("🚀 ReqPilot")
-
     st.caption("AI Requirements Engineering Agent")
 
     st.divider()
 
-    st.subheader("🔐 AI Connection")
+    st.subheader("🔑 AI Connection")
 
     api_key = None
 
     try:
-        if "GEMINI_API_KEY" in st.secrets:
-            api_key = st.secrets["GEMINI_API_KEY"]
-            st.success("✓ Gemini API Connected")
-        else:
-            api_key = st.text_input(
-                "Gemini API Key",
-                type="password"
-            )
+        api_key = st.secrets["GEMINI_API_KEY"]
+        st.success("API Key Loaded from Secrets")
     except Exception:
         api_key = st.text_input(
             "Gemini API Key",
-            type="password"
+            type="password",
+            placeholder="Enter API key"
         )
 
     st.divider()
 
-    st.subheader("🎯 Demo Presets")
+    st.subheader("🎬 Demo Preset")
 
     preset = st.selectbox(
-        "Choose project",
+        "Choose a product idea",
         [
             "Custom Idea",
-            "College Attendance System",
-            "AI Cold Outreach Platform",
-            "EV Charging Network",
+            "QuickCart Grocery Platform",
+            "AI Fitness Platform",
+            "EV Charging Platform",
             "Student Learning Platform"
         ]
     )
 
     st.divider()
 
-    st.subheader("🧠 AI Pipeline")
+    st.subheader("⚙️ Pipeline")
 
-    st.write("01  →  Requirement Extraction")
-    st.write("02  →  Requirement Classification")
-    st.write("03  →  Priority Analysis")
-    st.write("04  →  Ambiguity Detection")
-    st.write("05  →  User Story Generation")
-    st.write("06  →  Test Case Generation")
+    st.write("💡 Raw Idea")
+    st.write("🧩 Requirement Extraction")
+    st.write("🏷️ Classification")
+    st.write("⚡ Prioritization")
+    st.write("🔎 Gap Detection")
+    st.write("🧪 Test Generation")
 
     st.divider()
 
-    st.caption("G14 • Hackathon Prototype")
+    st.caption("G14 • AI Requirements Engineering Agent")
+
+
+# =========================================================
+# DEMO INPUTS
+# =========================================================
+
+demo_inputs = {
+
+    "QuickCart Grocery Platform": """
+We want to build QuickCart, a grocery delivery platform.
+
+Users should be able to create accounts, browse and search for groceries,
+add products to a cart, make online payments, place orders, track deliveries,
+and receive order notifications.
+
+The platform should securely handle user information and payments, support
+multiple users, and provide a reliable shopping experience.
+""",
+
+    "AI Fitness Platform": """
+We want to build an AI fitness platform where users can create profiles,
+set fitness goals, follow personalized workout plans, track progress,
+and receive recommendations based on their activity.
+""",
+
+    "EV Charging Platform": """
+We want to build an EV charging platform where electric vehicle owners
+can find nearby charging stations, check availability, reserve a charging
+slot, make payments, and receive notifications when charging is complete.
+""",
+
+    "Student Learning Platform": """
+We want to build a student learning platform where students can access
+courses, watch lessons, complete quizzes, track their progress, and receive
+personalized learning recommendations.
+"""
+}
 
 
 # =========================================================
@@ -212,99 +279,78 @@ with st.container(border=True):
     st.title("🚀 ReqPilot")
 
     st.write(
-        "Transform raw project ideas into structured software "
-        "requirements, Agile user stories, priorities, "
-        "ambiguity detection and development-ready test cases."
+        "Turn an informal product idea into structured, development-ready "
+        "software requirements using AI."
+    )
+
+    st.write(
+        "Requirements • User Stories • Priorities • Gaps • Test Cases • Dependencies"
     )
 
 
 # =========================================================
-# DEMO INPUT DATA
+# INPUT SECTION
 # =========================================================
 
-demo_texts = {
+st.write("")
 
-    "Custom Idea": "",
+if preset == "Custom Idea":
 
-    "College Attendance System":
-        """We want to build a college attendance management system
-        where teachers can mark attendance and students can view
-        their attendance. Students should receive alerts when their
-        attendance is low.""",
+    default_text = ""
 
-    "AI Cold Outreach Platform":
-        """We want to build an AI platform that helps sales teams
-        generate personalized cold emails from company profiles
-        and target customer information. The system should track
-        responses and suggest follow-up messages.""",
+else:
 
-    "EV Charging Network":
-        """We want to build an EV charging platform where users can
-        find nearby charging stations, check availability, reserve
-        a charger and make payments. Station owners should manage
-        charging points.""",
-
-    "Student Learning Platform":
-        """We want to build an online learning platform for college
-        students. Students can watch lessons, complete quizzes and
-        track progress. Teachers can upload courses and monitor
-        student performance."""
-}
+    default_text = demo_inputs[preset]
 
 
-# =========================================================
-# INPUT
-# =========================================================
+with st.container(border=True):
 
-st.subheader("💡 Describe Your Project")
+    st.subheader("💡 Describe Your Product")
 
-project_idea = st.text_area(
-    "Project idea",
-    value=demo_texts[preset],
-    height=170,
-    placeholder=(
-        "Example: Build a college attendance management "
-        "system for teachers and students..."
-    ),
-    label_visibility="collapsed"
-)
+    idea = st.text_area(
+        "Product / Startup Idea",
+        value=default_text,
+        height=190,
+        placeholder=(
+            "Example: We want to build an online grocery delivery "
+            "platform where users can..."
+        ),
+        label_visibility="collapsed"
+    )
 
 
 # =========================================================
 # METRICS
 # =========================================================
 
-word_count = len(project_idea.split()) if project_idea.strip() else 0
+word_count = len(idea.split()) if idea.strip() else 0
 
-c1, c2, c3, c4 = st.columns(4)
+m1, m2, m3, m4 = st.columns(4)
 
-with c1:
-    with st.container(border=True):
-        st.metric("Input Words", word_count)
+with m1:
+    st.metric("Input Words", word_count)
 
-with c2:
-    with st.container(border=True):
-        st.metric("AI Modules", 6)
+with m2:
+    st.metric("AI Modules", "6")
 
-with c3:
-    with st.container(border=True):
-        st.metric("Artifacts", 6)
+with m3:
+    st.metric("Artifacts", "6")
 
-with c4:
-    with st.container(border=True):
-        st.metric("AI Engine", "Gemini")
+with m4:
+    st.metric("AI Engine", "Gemini")
 
 
 # =========================================================
 # PIPELINE
 # =========================================================
 
-st.subheader("🔄 Intelligence Pipeline")
+st.write("")
+st.subheader("🔄 Requirement Intelligence Pipeline")
 
 pipeline = [
     ("💡", "Raw Idea", "User Input"),
     ("🧩", "Extract", "Requirements"),
-    ("🏷️", "Classify", "Functional / NFR"),
+    ("🏷️", "Classify", "FR / NFR"),
     ("⚡", "Prioritize", "MoSCoW"),
     ("🔎", "Detect Gaps", "Ambiguities"),
     ("🧪", "Test Cases", "Validation")
@@ -317,9 +363,13 @@ for col, item in zip(cols, pipeline):
     icon, title, subtitle = item
 
     with col:
+
         with st.container(border=True):
+
             st.markdown(f"### {icon}")
+
             st.write(f"**{title}**")
+
             st.caption(subtitle)
 
 
@@ -330,39 +380,66 @@ for col, item in zip(cols, pipeline):
 demo_data = {
 
     "functional_requirements": [
-        "Teachers shall be able to mark attendance for students.",
-        "Students shall be able to view their attendance percentage.",
-        "The system shall automatically calculate attendance percentage.",
-        "The system shall notify students when attendance falls below the configured threshold."
+
+        "Users should be able to create an account and securely log in.",
+
+        "Users should be able to browse groceries by category and search for products.",
+
+        "Users should be able to add products to a shopping cart and update quantities.",
+
+        "Users should be able to place orders and make online payments.",
+
+        "Users should be able to view their order status and track delivery.",
+
+        "The system should send notifications for order confirmation and delivery updates."
     ],
 
     "non_functional_requirements": [
-        "The system shall provide secure role-based access.",
-        "Attendance records shall be stored reliably.",
-        "The system should provide acceptable response time."
+
+        "User payment and personal information must be securely protected.",
+
+        "The application should provide fast response times during normal usage.",
+
+        "The system should remain available during high-demand periods.",
+
+        "The application should support multiple users placing orders simultaneously."
     ],
 
     "user_stories": [
 
         {
             "story":
-                "As a teacher, I want to mark student attendance "
-                "so that attendance records are maintained digitally.",
+                "As a customer, I want to search for groceries so that I can quickly find the products I need.",
 
             "acceptance_criteria": [
-                "Given a teacher is logged in, when they open a class, then enrolled students should be displayed.",
-                "Given the student list is displayed, when attendance is marked, then the record should be saved."
+
+                "Given the user is on the product page, when they enter a product name, then matching products should be displayed.",
+
+                "Given no matching product exists, when the user searches, then a suitable message should be displayed."
             ]
         },
 
         {
             "story":
-                "As a student, I want to view my attendance percentage "
-                "so that I can monitor my attendance.",
+                "As a customer, I want to place an online order so that I can receive groceries at my preferred address.",
 
             "acceptance_criteria": [
-                "Given a student is logged in, when they open attendance, then their percentage should be displayed.",
-                "Given attendance records exist, when the percentage is calculated, then it should reflect stored data."
+
+                "Given the cart contains products, when the user confirms the order and payment succeeds, then the order should be created.",
+
+                "Given payment fails, when the user attempts to place the order, then the order should not be confirmed."
+            ]
+        },
+
+        {
+            "story":
+                "As a customer, I want to track my order so that I know its current delivery status.",
+
+            "acceptance_criteria": [
+
+                "Given an order has been placed, when the user opens order tracking, then the current order status should be displayed.",
+
+                "The user should receive updates when the delivery status changes."
             ]
         }
     ],
@@ -370,57 +447,120 @@ demo_data = {
     "priorities": [
 
         {
-            "requirement": "Teacher attendance marking",
+            "requirement": "User registration and login",
             "priority": "Must Have",
-            "reason": "Core functionality."
+            "reason":
+                "Users need secure accounts to manage orders and personal information."
         },
 
         {
-            "requirement": "Student attendance dashboard",
+            "requirement": "Product search and browsing",
             "priority": "Must Have",
-            "reason": "Required for attendance monitoring."
+            "reason":
+                "Customers need to find products before placing an order."
         },
 
         {
-            "requirement": "Low attendance alerts",
+            "requirement": "Shopping cart",
+            "priority": "Must Have",
+            "reason":
+                "Customers need to select and manage products before checkout."
+        },
+
+        {
+            "requirement": "Online payment",
+            "priority": "Must Have",
+            "reason":
+                "Payment is required to complete an online order."
+        },
+
+        {
+            "requirement": "Order tracking",
             "priority": "Should Have",
-            "reason": "Useful for proactive notification."
+            "reason":
+                "Tracking improves delivery visibility and customer experience."
+        },
+
+        {
+            "requirement": "Personalized product recommendations",
+            "priority": "Could Have",
+            "reason":
+                "Recommendations can improve product discovery but are not required for the core ordering flow."
         }
     ],
 
     "ambiguities": [
-        "What attendance percentage should trigger an alert?",
-        "Should alerts use email, SMS, push notification, or multiple channels?",
-        "Should teachers be able to edit attendance after submission?"
+
+        "Which payment methods should be supported?",
+
+        "What delivery areas and geographical locations should be supported?",
+
+        "What happens when a product becomes unavailable after the user adds it to the cart?",
+
+        "Should users be able to cancel an order after payment?",
+
+        "What is the expected delivery time?",
+
+        "Should notifications be sent through SMS, email, push notifications, or all three?"
     ],
 
     "test_cases": [
 
         {
-            "id": "TC-001",
-            "scenario": "Teacher marks a student present",
-            "expected": "Attendance record should be saved successfully."
+            "id": "TC-01",
+            "scenario": "User searches for an available grocery product.",
+            "expected":
+                "Matching products should be displayed with product name, price, and availability."
         },
 
         {
-            "id": "TC-002",
-            "scenario": "Student opens attendance dashboard",
-            "expected": "Correct attendance percentage should be displayed."
+            "id": "TC-02",
+            "scenario":
+                "User adds products to the cart and changes the quantity.",
+            "expected":
+                "Cart quantity and total price should update correctly."
         },
 
         {
-            "id": "TC-003",
-            "scenario": "Attendance falls below threshold",
-            "expected": "Low-attendance notification should be triggered."
+            "id": "TC-03",
+            "scenario":
+                "User completes checkout with a successful payment.",
+            "expected":
+                "The order should be created and an order confirmation should be displayed."
+        },
+
+        {
+            "id": "TC-04",
+            "scenario":
+                "Payment fails during checkout.",
+            "expected":
+                "The order should not be confirmed and the user should receive an appropriate error message."
+        },
+
+        {
+            "id": "TC-05",
+            "scenario":
+                "User opens tracking for an existing order.",
+            "expected":
+                "The current delivery status should be displayed."
         }
     ],
 
     "technical_dependencies": [
-        "User authentication",
-        "Role-based authorization",
-        "Attendance database",
+
+        "User authentication and authorization",
+
+        "Product and inventory database",
+
+        "Shopping cart and order management backend",
+
+        "Payment gateway API",
+
+        "Delivery and order tracking service",
+
         "Notification service",
-        "Web frontend"
+
+        "Web or mobile frontend"
     ]
 }
 
@@ -432,60 +572,59 @@ demo_data = {
 def create_prompt(idea):
 
     return f"""
-You are an expert Software Requirements Engineer.
+You are an AI Requirements Engineering Agent.
 
-Analyze this project idea:
+Analyze the following software product idea:
 
 {idea}
 
-Return ONLY valid JSON.
-
-Use exactly this structure:
+Return ONLY valid JSON using exactly this structure:
 
 {{
-  "functional_requirements": [],
-  "non_functional_requirements": [],
-  "user_stories": [
-    {{
-      "story": "",
-      "acceptance_criteria": []
-    }}
-  ],
-  "priorities": [
-    {{
-      "requirement": "",
-      "priority": "",
-      "reason": ""
-    }}
-  ],
-  "ambiguities": [],
-  "test_cases": [
-    {{
-      "id": "",
-      "scenario": "",
-      "expected": ""
-    }}
-  ],
-  "technical_dependencies": []
+    "functional_requirements": [],
+    "non_functional_requirements": [],
+    "user_stories": [
+        {{
+            "story": "",
+            "acceptance_criteria": []
+        }}
+    ],
+    "priorities": [
+        {{
+            "requirement": "",
+            "priority": "",
+            "reason": ""
+        }}
+    ],
+    "ambiguities": [],
+    "test_cases": [
+        {{
+            "id": "",
+            "scenario": "",
+            "expected": ""
+        }}
+    ],
+    "technical_dependencies": []
 }}
 
 Rules:
 
-1. Extract functional requirements.
-2. Extract non-functional requirements.
-3. Generate useful Agile user stories.
-4. Use Given / When / Then acceptance criteria.
-5. Assign MoSCoW priorities.
-6. Identify unclear or missing requirements.
+1. Extract clear functional requirements.
+2. Extract realistic non-functional requirements.
+3. Generate Agile-style user stories.
+4. Include Given/When/Then style acceptance criteria where useful.
+5. Prioritize requirements using MoSCoW:
+   Must Have, Should Have, Could Have, Won't Have.
+6. Identify missing or ambiguous requirements.
 7. Generate practical test cases.
-8. Identify technical dependencies.
+8. Identify realistic technical dependencies.
 9. Do not invent unnecessary features.
-10. Keep the result concise and useful for developers.
+10. Keep the output concise and suitable for a software development team.
 """
 
 
 # =========================================================
-# GEMINI FUNCTION
+# GEMINI ANALYSIS
 # =========================================================
 
 def analyze_with_gemini(idea, key):
@@ -494,13 +633,18 @@ def analyze_with_gemini(idea, key):
 
     prompt = create_prompt(idea)
 
+    last_error = None
+
     for attempt in range(3):
 
         try:
 
             response = client.models.generate_content(
+
                 model="gemini-3.6-flash",
+
                 contents=prompt,
+
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json"
                 )
@@ -510,34 +654,39 @@ def analyze_with_gemini(idea, key):
 
         except Exception as e:
 
+            last_error = e
+
             error_text = str(e)
 
-            if (
-                ("503" in error_text or "UNAVAILABLE" in error_text)
-                and attempt < 2
-            ):
-                time.sleep(2 ** attempt)
-                continue
+            if "503" in error_text or "UNAVAILABLE" in error_text:
 
-            raise e
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+
+            raise last_error
+
+    raise last_error
 
 
 # =========================================================
-# RESULT DISPLAY
+# DISPLAY RESULTS
 # =========================================================
 
 def display_results(data):
 
-    st.subheader("✨ Engineering Analysis")
+    st.write("")
 
-    tabs = st.tabs(
+    st.subheader("📊 Generated Requirements")
+
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
         [
             "📋 Requirements",
             "👤 User Stories",
             "⚡ Priorities",
             "🔎 Gaps",
             "🧪 Test Cases",
-            "⚙️ Technical"
+            "🔧 Technical"
         ]
     )
 
@@ -546,33 +695,33 @@ def display_results(data):
     # REQUIREMENTS
     # -----------------------------------------------------
 
-    with tabs[0]:
+    with tab1:
 
         st.markdown("### Functional Requirements")
 
-        requirements = data.get(
-            "functional_requirements",
-            []
-        )
-
-        for i, req in enumerate(requirements, 1):
+        for i, req in enumerate(
+            data.get("functional_requirements", []),
+            1
+        ):
 
             with st.container(border=True):
+
                 st.write(f"**FR-{i:02d}**")
+
                 st.write(req)
 
 
         st.markdown("### Non-Functional Requirements")
 
-        nfr = data.get(
-            "non_functional_requirements",
-            []
-        )
-
-        for i, req in enumerate(nfr, 1):
+        for i, req in enumerate(
+            data.get("non_functional_requirements", []),
+            1
+        ):
 
             with st.container(border=True):
+
                 st.write(f"**NFR-{i:02d}**")
+
                 st.write(req)
 
 
@@ -580,62 +729,55 @@ def display_results(data):
     # USER STORIES
     # -----------------------------------------------------
 
-    with tabs[1]:
+    with tab2:
 
-        stories = data.get(
-            "user_stories",
-            []
-        )
+        stories = data.get("user_stories", [])
+
+        if not stories:
+
+            st.info("No user stories generated.")
 
         for i, story in enumerate(stories, 1):
 
             with st.container(border=True):
 
-                st.markdown(f"### User Story {i}")
+                st.markdown(f"### 👤 User Story {i}")
 
-                st.write(
-                    story.get("story", "")
-                )
+                st.write(story.get("story", ""))
 
-                st.markdown(
-                    "**Acceptance Criteria**"
-                )
+                criteria = story.get("acceptance_criteria", [])
 
-                for criterion in story.get(
-                    "acceptance_criteria",
-                    []
-                ):
+                if criteria:
 
-                    st.write(
-                        f"• {criterion}"
-                    )
+                    st.write("**Acceptance Criteria**")
+
+                    for criterion in criteria:
+
+                        st.write(f"• {criterion}")
 
 
     # -----------------------------------------------------
     # PRIORITIES
     # -----------------------------------------------------
 
-    with tabs[2]:
+    with tab3:
 
-        priorities = data.get(
-            "priorities",
-            []
-        )
+        priorities = data.get("priorities", [])
 
         for item in priorities:
 
             with st.container(border=True):
 
-                st.markdown(
-                    f"### {item.get('requirement', '')}"
+                st.write(
+                    f"**{item.get('requirement', 'Requirement')}**"
                 )
 
                 st.write(
-                    f"⚡ **{item.get('priority', '')}**"
+                    f"Priority: **{item.get('priority', 'N/A')}**"
                 )
 
                 st.caption(
-                    item.get("reason", "")
+                    item.get('reason', '')
                 )
 
 
@@ -643,57 +785,43 @@ def display_results(data):
     # GAPS
     # -----------------------------------------------------
 
-    with tabs[3]:
+    with tab4:
 
-        ambiguities = data.get(
-            "ambiguities",
-            []
-        )
+        ambiguities = data.get("ambiguities", [])
 
-        if ambiguities:
+        if not ambiguities:
 
-            st.warning(
-                "These requirements need clarification:"
-            )
-
-            for i, question in enumerate(
-                ambiguities,
-                1
-            ):
-
-                with st.container(border=True):
-                    st.write(
-                        f"**Q{i}.** {question}"
-                    )
+            st.success("No major ambiguities detected.")
 
         else:
 
-            st.success(
-                "No major ambiguities detected."
-            )
+            for i, item in enumerate(ambiguities, 1):
+
+                with st.container(border=True):
+
+                    st.write(f"🔎 **Gap {i}**")
+
+                    st.write(item)
 
 
     # -----------------------------------------------------
     # TEST CASES
     # -----------------------------------------------------
 
-    with tabs[4]:
+    with tab5:
 
-        tests = data.get(
-            "test_cases",
-            []
-        )
+        test_cases = data.get("test_cases", [])
 
-        for test in tests:
+        for test in test_cases:
 
             with st.container(border=True):
 
-                st.caption(
-                    test.get("id", "")
+                st.write(
+                    f"### 🧪 {test.get('id', 'Test Case')}"
                 )
 
-                st.markdown(
-                    f"### {test.get('scenario', '')}"
+                st.write(
+                    f"**Scenario:** {test.get('scenario', '')}"
                 )
 
                 st.write(
@@ -705,131 +833,130 @@ def display_results(data):
     # TECHNICAL
     # -----------------------------------------------------
 
-    with tabs[5]:
-
-        st.markdown(
-            "### Technical Dependencies"
-        )
+    with tab6:
 
         dependencies = data.get(
             "technical_dependencies",
             []
         )
 
+        st.markdown("### 🔧 Technical Dependencies")
+
         for dependency in dependencies:
 
-            st.write(
-                f"🔹 {dependency}"
-            )
+            st.write(f"• {dependency}")
 
 
     # -----------------------------------------------------
-    # DOWNLOAD
+    # DOWNLOAD JSON
     # -----------------------------------------------------
 
     st.divider()
 
-    json_output = json.dumps(
-        data,
-        indent=2,
-        ensure_ascii=False
-    )
-
     st.download_button(
-        "⬇️ Download Analysis JSON",
-        json_output,
-        "reqpilot_analysis.json",
-        "application/json"
+
+        label="⬇️ Download Requirements JSON",
+
+        data=json.dumps(
+            data,
+            indent=2,
+            ensure_ascii=False
+        ),
+
+        file_name="reqpilot_requirements.json",
+
+        mime="application/json"
     )
 
 
 # =========================================================
-# BUTTONS
+# ACTION BUTTONS
 # =========================================================
 
-button1, button2 = st.columns([4, 1])
+st.write("")
 
-with button1:
+col1, col2 = st.columns(2)
 
-    analyze = st.button(
+
+with col1:
+
+    analyze_button = st.button(
         "⚡ Analyze Requirements",
         type="primary",
         use_container_width=True
     )
 
-with button2:
 
-    demo = st.button(
+with col2:
+
+    demo_button = st.button(
         "🎬 Demo Mode",
         use_container_width=True
     )
 
 
 # =========================================================
-# ANALYZE
+# LIVE AI ANALYSIS
 # =========================================================
 
-if analyze:
+if analyze_button:
 
-    if not project_idea.strip():
+    if not idea.strip():
 
         st.warning(
-            "💡 Please enter a project idea first."
+            "Please enter a product or startup idea first."
         )
 
     elif not api_key:
 
         st.error(
-            "🔐 Gemini API key not found."
+            "Gemini API key not found. Add GEMINI_API_KEY in Streamlit Secrets."
         )
 
     else:
 
         with st.spinner(
-            "🧠 ReqPilot is analyzing your project..."
+            "🤖 ReqPilot is analyzing your requirements..."
         ):
 
             try:
 
                 result = analyze_with_gemini(
-                    project_idea,
+                    idea,
                     api_key
                 )
 
                 st.success(
-                    "✅ Analysis completed successfully!"
+                    "✅ Requirements successfully generated!"
                 )
 
                 display_results(result)
 
             except Exception as e:
 
-                error = str(e)
+                error_text = str(e)
 
-                if (
-                    "503" in error
-                    or "UNAVAILABLE" in error
-                ):
+                if "503" in error_text or "UNAVAILABLE" in error_text:
 
                     st.error(
-                        "⚠️ Gemini is temporarily busy. "
+                        "Gemini is temporarily unavailable. "
                         "Please try again or use Demo Mode."
                     )
 
                 elif (
-                    "429" in error
-                    or "quota" in error.lower()
+                    "429" in error_text
+                    or "quota" in error_text.lower()
                 ):
 
                     st.error(
-                        "⚠️ API quota/rate limit reached. "
-                        "Try Demo Mode."
+                        "Gemini API quota/rate limit reached. "
+                        "Please try again later or use Demo Mode."
                     )
 
                 else:
 
                     st.error(
-                        f"❌ Error: {error}"
+                        f"Execution Error: {error_text}"
                     )
 
 
@@ -837,10 +964,10 @@ if analyze:
 # DEMO MODE
 # =========================================================
 
-if demo:
+if demo_button:
 
     st.success(
-        "🎬 Demo Mode — No API call required."
+        "🎬 Demo Mode activated — showing QuickCart example."
     )
 
     display_results(demo_data)
@@ -850,45 +977,47 @@ if demo:
 # FEATURES
 # =========================================================
 
+st.write("")
 st.divider()
 
-st.subheader("✨ Built for Requirements Engineering")
+st.subheader("✨ Core Capabilities")
 
-f1, f2, f3 = st.columns(3)
-
-with f1:
-
-    with st.container(border=True):
-
-        st.markdown("### 📋 Requirement Extraction")
-
-        st.write(
-            "Converts informal project ideas into "
-            "structured functional and non-functional requirements."
-        )
+c1, c2, c3 = st.columns(3)
 
 
-with f2:
+with c1:
 
     with st.container(border=True):
 
-        st.markdown("### ⚠️ Ambiguity Detection")
+        st.markdown("### 🧩 Requirement Extraction")
 
         st.write(
-            "Identifies missing, unclear and incomplete "
-            "requirements that need clarification."
+            "Converts an informal product idea into structured "
+            "functional and non-functional requirements."
         )
 
 
-with f3:
+with c2:
+
+    with st.container(border=True):
+
+        st.markdown("### 🔎 Ambiguity Detection")
+
+        st.write(
+            "Identifies missing decisions and unclear requirements "
+            "before development begins."
+        )
+
+
+with c3:
 
     with st.container(border=True):
 
         st.markdown("### 🧪 Test Generation")
 
         st.write(
-            "Converts requirements into practical "
-            "test scenarios for development and validation."
+            "Creates practical test scenarios from the generated "
+            "requirements."
         )
 
 
@@ -896,20 +1025,18 @@ with f3:
 # TECHNICAL CONTRIBUTION
 # =========================================================
 
-st.divider()
+st.write("")
 
 with st.container(border=True):
 
-    st.subheader(
-        "🧠 Technical Contribution"
-    )
+    st.subheader("🧠 Technical Contribution")
 
     st.write(
         "Our solution is not just a generic API wrapper. "
-        "ReqPilot uses a structured multi-stage requirements "
-        "analysis pipeline covering requirement classification, "
-        "ambiguity detection, prioritization, user-story generation "
-        "and test-case generation from a single project description."
+        "ReqPilot uses a structured multi-stage requirements analysis "
+        "pipeline covering requirement classification, ambiguity detection, "
+        "prioritization, user-story generation and test-case generation "
+        "from a single project description."
     )
 
 
@@ -917,9 +1044,8 @@ with st.container(border=True):
 # FOOTER
 # =========================================================
 
-st.divider()
+st.write("")
 
 st.caption(
-    "🚀 ReqPilot • G14 AI Requirements Engineering Agent • "
-    "Python • Streamlit • Generative AI"
+    "ReqPilot • AI Requirements Engineering Agent • G14"
 )
